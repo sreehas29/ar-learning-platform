@@ -27,6 +27,8 @@ import { useApp } from "../../context/AppContext";
 import CameraFeed from "../../modules/Camera/CameraFeed";
 import ARSceneCanvas from "../../modules/Scene/ARSceneCanvas";
 import ARHUDOverlay from "../../modules/Overlays/ARHUDOverlay";
+import MarkerTracker from "../../modules/Tracking/MarkerTracker";
+import { exportCanvasSnapshot } from "../../services/arService";
 
 export default function ARView() {
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ export default function ARView() {
   const [scale, setScale] = useState(1);
   const [isWireframe, setIsWireframe] = useState(false);
   const [isCameraEnabled, setIsCameraEnabled] = useState(true);
+  const [trackingMode, setTrackingMode] = useState("marker"); // "marker" | "surface"
   const [snapshotTaken, setSnapshotTaken] = useState(false);
 
   const handleExit = () => {
@@ -52,7 +55,12 @@ export default function ARView() {
     setIsWireframe(false);
   };
 
+  const handleToggleTrackingMode = () => {
+    setTrackingMode((prev) => (prev === "marker" ? "surface" : "marker"));
+  };
+
   const handleSnapshot = () => {
+    const success = exportCanvasSnapshot(`AR-Lesson-${selectedActivity?.id || "snapshot"}.png`);
     setSnapshotTaken(true);
     setTimeout(() => setSnapshotTaken(false), 3000);
   };
@@ -75,10 +83,10 @@ export default function ARView() {
         fontFamily: "Inter, Roboto, sans-serif",
       }}
     >
-      {/* 1. Live Camera Passthrough Background */}
+      {/* 1. Live Camera Passthrough Feed */}
       <CameraFeed isCameraEnabled={isCameraEnabled} />
 
-      {/* 2. Real-time Three.js 3D WebGL Scene Engine */}
+      {/* 2. Three.js 3D WebGL Scene Engine */}
       <ARSceneCanvas
         activity={selectedActivity}
         isWireframe={isWireframe}
@@ -86,10 +94,16 @@ export default function ARView() {
         scaleFactor={scale}
       />
 
-      {/* 3. Educational AR Analytics & Quiz Overlay */}
+      {/* 3. Optical Marker Tracking System Overlay */}
+      <MarkerTracker
+        trackingMode={trackingMode}
+        onToggleMode={handleToggleTrackingMode}
+      />
+
+      {/* 4. Educational AR Analytics & Quiz Overlay */}
       <ARHUDOverlay activity={selectedActivity} />
 
-      {/* 4. Top Control & Navigation HUD */}
+      {/* 5. Top Navigation Header Bar */}
       <Box
         sx={{
           p: 2,
@@ -145,7 +159,7 @@ export default function ARView() {
         </Stack>
       </Box>
 
-      {/* Snapshot Notification Feedback */}
+      {/* Snapshot Download Alert */}
       {snapshotTaken && (
         <Alert
           severity="success"
@@ -159,11 +173,11 @@ export default function ARView() {
             color: "#FFFFFF",
           }}
         >
-          AR 3D Lesson Snapshot Captured!
+          AR 3D Lesson Snapshot Downloaded!
         </Alert>
       )}
 
-      {/* 5. Bottom Floating Interactive Control Bar */}
+      {/* 6. Bottom Floating Interactive Controls Toolbar */}
       <Box
         sx={{
           p: 2,

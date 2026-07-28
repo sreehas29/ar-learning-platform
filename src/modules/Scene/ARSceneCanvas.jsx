@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Box } from "@mui/material";
 import * as THREE from "three";
+import { getModelConfigForActivity } from "../../registry/modelRegistry";
 
 export default function ARSceneCanvas({
   activity,
@@ -17,45 +18,50 @@ export default function ARSceneCanvas({
     const width = container.clientWidth || window.innerWidth;
     const height = container.clientHeight || window.innerHeight;
 
-    // 1. Scene & Camera Setup
+    // 1. Model Registry Configuration
+    const config = getModelConfigForActivity(activity?.id);
+
+    // 2. Scene & Camera Setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
     camera.position.set(0, 0, 5);
 
-    // 2. WebGL Renderer
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    // 3. WebGL Renderer
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
 
-    // 3. Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    // 4. Lighting Setup
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
     const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.5);
     dirLight.position.set(5, 10, 7);
     scene.add(dirLight);
 
-    const pointLight = new THREE.PointLight(0x22c55e, 1, 10);
+    const pointLight = new THREE.PointLight(config.primaryColor, 1.2, 10);
     pointLight.position.set(-5, -5, -2);
     scene.add(pointLight);
 
-    // 4. Create Dynamic 3D Mesh based on Activity
+    // 5. Create Dynamic 3D Mesh based on Model Registry Config
     const group = new THREE.Group();
     scene.add(group);
 
     let mainMesh;
     let extraObjects = [];
 
-    const activityId = activity?.id || "";
-    const subject = activity?.subject || "math";
+    const geomType = config.geometryType;
 
-    if (subject === "math" || activityId.includes("math")) {
-      // 3D Polyhedron / Geometry
-      const geometry = new THREE.BoxGeometry(1.6, 1.6, 1.6);
+    if (geomType === "box" || geomType === "cylinder" || geomType === "octahedron") {
+      let geometry;
+      if (geomType === "box") geometry = new THREE.BoxGeometry(1.6, 1.6, 1.6);
+      else if (geomType === "cylinder") geometry = new THREE.CylinderGeometry(0.9, 0.9, 1.8, 32);
+      else geometry = new THREE.OctahedronGeometry(1.4);
+
       const material = new THREE.MeshStandardMaterial({
-        color: 0x1565c0,
+        color: config.primaryColor,
         roughness: 0.3,
         metalness: 0.2,
         wireframe: isWireframe,
@@ -63,28 +69,26 @@ export default function ARSceneCanvas({
       mainMesh = new THREE.Mesh(geometry, material);
       group.add(mainMesh);
 
-      // Outer Wireframe Box Frame
+      // Outer Wireframe Frame
       const wireGeo = new THREE.WireframeGeometry(geometry);
-      const wireMat = new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 });
+      const wireMat = new THREE.LineBasicMaterial({ color: config.secondaryColor, linewidth: 2 });
       const wireframeLines = new THREE.LineSegments(wireGeo, wireMat);
-      wireframeLines.scale.set(1.05, 1.05, 1.05);
+      wireframeLines.scale.set(1.04, 1.04, 1.04);
       group.add(wireframeLines);
-      extraObjects.push(wireframeLines);
-    } else if (activityId.includes("sci-6-1") || activityId.includes("astronomy")) {
-      // Solar System Planet + Moon
+    } else if (geomType === "solar-system") {
+      // Solar System Planet + Ring + Moon
       const planetGeo = new THREE.SphereGeometry(1.2, 32, 32);
       const planetMat = new THREE.MeshStandardMaterial({
-        color: 0x0284c7,
+        color: config.primaryColor,
         roughness: 0.4,
         wireframe: isWireframe,
       });
       mainMesh = new THREE.Mesh(planetGeo, planetMat);
       group.add(mainMesh);
 
-      // Planet Ring
       const ringGeo = new THREE.RingGeometry(1.5, 2.0, 32);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x38bdf8,
+        color: config.secondaryColor,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.7,
@@ -94,46 +98,43 @@ export default function ARSceneCanvas({
       ringMesh.rotation.x = Math.PI / 2.5;
       group.add(ringMesh);
 
-      // Orbiting Moon
       const moonGeo = new THREE.SphereGeometry(0.3, 16, 16);
       const moonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0 });
       const moonMesh = new THREE.Mesh(moonGeo, moonMat);
       moonMesh.position.set(2.2, 0, 0);
       group.add(moonMesh);
-      extraObjects.push(moonMesh);
-    } else if (activityId.includes("sci-9-1") || activityId.includes("atomic")) {
+      extraObjects.push({ mesh: moonMesh, radius: 2.2, speed: 1.2 });
+    } else if (geomType === "atomic") {
       // Bohr Atomic Model Nucleus + Electrons
       const nucleusGeo = new THREE.SphereGeometry(0.7, 32, 32);
       const nucleusMat = new THREE.MeshStandardMaterial({
-        color: 0xef4444,
+        color: config.primaryColor,
         roughness: 0.2,
         wireframe: isWireframe,
       });
       mainMesh = new THREE.Mesh(nucleusGeo, nucleusMat);
       group.add(mainMesh);
 
-      // Electron Orbit Rings
       for (let i = 0; i < 3; i++) {
         const ringGeo = new THREE.TorusGeometry(1.6 + i * 0.4, 0.02, 16, 100);
-        const ringMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+        const ringMat = new THREE.MeshBasicMaterial({ color: config.secondaryColor });
         const ringMesh = new THREE.Mesh(ringGeo, ringMat);
         ringMesh.rotation.x = (Math.PI / 3) * i;
         ringMesh.rotation.y = (Math.PI / 4) * i;
         group.add(ringMesh);
 
-        // Electron Sphere
         const electronGeo = new THREE.SphereGeometry(0.12, 16, 16);
-        const electronMat = new THREE.MeshBasicMaterial({ color: 0x4ade80 });
+        const electronMat = new THREE.MeshBasicMaterial({ color: config.wireframeColor });
         const electronMesh = new THREE.Mesh(electronGeo, electronMat);
         electronMesh.position.set(1.6 + i * 0.4, 0, 0);
         group.add(electronMesh);
-        extraObjects.push({ mesh: electronMesh, radius: 1.6 + i * 0.4, speed: 1.5 + i * 0.5, axis: i });
+        extraObjects.push({ mesh: electronMesh, radius: 1.6 + i * 0.4, speed: 1.5 + i * 0.5 });
       }
     } else {
-      // General Science / Cell / Default Mesh (Icosahedron)
+      // Default Icosahedron Mesh
       const geometry = new THREE.IcosahedronGeometry(1.3, 1);
       const material = new THREE.MeshStandardMaterial({
-        color: 0x10b981,
+        color: config.primaryColor,
         roughness: 0.3,
         wireframe: isWireframe,
       });
@@ -141,7 +142,7 @@ export default function ARSceneCanvas({
       group.add(mainMesh);
     }
 
-    // 5. Animation Loop
+    // 6. Animation Frame Loop
     let animationFrameId;
     let clock = new THREE.Clock();
 
@@ -149,12 +150,12 @@ export default function ARSceneCanvas({
       animationFrameId = requestAnimationFrame(animate);
       const elapsedTime = clock.getElapsedTime();
 
-      // Constant gentle auto rotation
-      group.rotation.y = elapsedTime * 0.5 + (manualRotation * Math.PI) / 180;
+      group.rotation.y = elapsedTime * config.autoRotateSpeed + (manualRotation * Math.PI) / 180;
       group.rotation.x = Math.sin(elapsedTime * 0.3) * 0.2;
-      group.scale.set(scaleFactor, scaleFactor, scaleFactor);
 
-      // Animate extra objects (e.g. electrons/moons)
+      const combinedScale = config.initialScale * scaleFactor;
+      group.scale.set(combinedScale, combinedScale, combinedScale);
+
       extraObjects.forEach((obj) => {
         if (obj.radius) {
           const angle = elapsedTime * obj.speed;
@@ -168,7 +169,7 @@ export default function ARSceneCanvas({
 
     animate();
 
-    // 6. Handle Window Resize
+    // 7. Resize Handler
     function handleResize() {
       if (!container) return;
       const w = container.clientWidth;
@@ -180,7 +181,6 @@ export default function ARSceneCanvas({
 
     window.addEventListener("resize", handleResize);
 
-    // Cleanup
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);

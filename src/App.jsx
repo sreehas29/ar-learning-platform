@@ -6,7 +6,7 @@ import Activity from "./pages/Activity/Activity";
 import Instructions from "./pages/Instructions/Instructions";
 import ARView from "./pages/ARView/ARView";
 
-function App() {
+export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
@@ -17,5 +17,3 @@ function App() {
     </Routes>
   );
 }
-
-export default App;

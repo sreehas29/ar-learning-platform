@@ -11,11 +11,11 @@ import {
 import SchoolIcon from "@mui/icons-material/School";
 
 import SubjectGrid from "../../components/dashboard/SubjectGrid";
+import { useApp } from "../../context/AppContext";
 
 export default function Home() {
   const navigate = useNavigate();
-
-  const [selectedSubject, setSelectedSubject] = useState("");
+  const { selectedSubject, setSelectedSubject } = useApp();
 
   const handleContinue = () => {
     navigate("/dashboard");

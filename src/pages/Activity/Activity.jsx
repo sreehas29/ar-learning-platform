@@ -18,6 +18,7 @@ import SchoolIcon from "@mui/icons-material/School";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import AddCircleOutlinedIcon from "@mui/icons-material/AddCircleOutlined";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import VerifiedIcon from "@mui/icons-material/Verified";
 
 import { useApp } from "../../context/AppContext";
 import ActivityGrid from "../../modules/Activities/ActivityGrid";
@@ -37,7 +38,7 @@ export default function Activity() {
 
   const [localActivity, setLocalActivity] = useState(selectedActivity || null);
   const [showBuilderModal, setShowBuilderModal] = useState(false);
-  const [ncertFilter, setNcertFilter] = useState("all"); // "all" | "ncert-math" | "ncert-sci" | "custom"
+  const [ncertFilter, setNcertFilter] = useState("all");
 
   const defaultActivities = getActivitiesBySubjectAndGrade(
     selectedSubject,
@@ -50,7 +51,6 @@ export default function Activity() {
 
   const allActivities = [...matchingCustom, ...defaultActivities];
 
-  // Apply NCERT Filter
   const filteredActivities = allActivities.filter((act) => {
     if (ncertFilter === "ncert-math") return act.ncertCode && act.subject === "math";
     if (ncertFilter === "ncert-sci") return act.ncertCode && act.subject === "science";
@@ -95,7 +95,7 @@ export default function Activity() {
   const currentSubject = selectedSubject ? subjectMeta[selectedSubject] : null;
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#F5F7FA" }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#F8FAFC" }}>
       <Navbar />
 
       <Box
@@ -104,17 +104,20 @@ export default function Activity() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(135deg, #F5F7FA 0%, #E3F2FD 100%)",
-          p: 3,
+          background: "radial-gradient(circle at 50% 0%, #E3F2FD 0%, #F8FAFC 70%)",
+          p: { xs: 2, md: 4 },
         }}
       >
         <Paper
-          elevation={6}
+          elevation={8}
           sx={{
             width: "100%",
-            maxWidth: 1000,
-            p: { xs: 3, md: 5 },
-            borderRadius: 5,
+            maxWidth: 1050,
+            p: { xs: 3, sm: 5, md: 6 },
+            borderRadius: 6,
+            backgroundColor: "#FFFFFF",
+            boxShadow: "0 20px 50px rgba(15, 23, 42, 0.08)",
+            border: "1px solid rgba(226, 232, 240, 0.8)",
           }}
         >
           {/* Navigation & Header Status Bar */}
@@ -129,9 +132,9 @@ export default function Activity() {
             <Button
               startIcon={<ArrowBackIcon />}
               onClick={handleBackToDashboard}
-              sx={{ color: "text.secondary" }}
+              sx={{ color: "text.secondary", textTransform: "none", fontWeight: 600 }}
             >
-              Back to Dashboard
+              Back to Teacher Dashboard
             </Button>
 
             <Stack direction="row" spacing={1.5} alignItems="center">
@@ -141,7 +144,7 @@ export default function Activity() {
                   label={currentSubject.name}
                   color={currentSubject.color}
                   variant="outlined"
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 700 }}
                 />
               )}
               {selectedGrade && (
@@ -150,7 +153,7 @@ export default function Activity() {
                   label={`Grade ${selectedGrade}`}
                   color="info"
                   variant="outlined"
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 700 }}
                 />
               )}
             </Stack>
@@ -159,42 +162,62 @@ export default function Activity() {
           <Divider sx={{ mb: 4 }} />
 
           {/* Title Section */}
-          <Box textAlign="center" mb={3}>
-            <Box display="inline-flex" alignItems="center" gap={1} mb={1}>
-              <ViewInArIcon color="primary" sx={{ fontSize: 36 }} />
-              <Typography variant="h4" component="h1" color="primary" fontWeight={700}>
+          <Box textAlign="center" mb={4}>
+            <Chip
+              icon={<VerifiedIcon style={{ color: "#1565C0" }} />}
+              label="NCERT School Kits (UPMK, SMK, UPSK, SSK) & Lab Manual Aligned"
+              color="primary"
+              variant="outlined"
+              sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.8rem" }}
+            />
+
+            <Box display="inline-flex" alignItems="center" justify-content="center" gap={1.5} mb={1}>
+              <ViewInArIcon color="primary" sx={{ fontSize: 40 }} />
+              <Typography
+                variant="h3"
+                component="h1"
+                sx={{
+                  fontWeight: 900,
+                  fontSize: { xs: "2rem", sm: "2.5rem" },
+                  background: "linear-gradient(135deg, #0F172A 0%, #1565C0 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
                 AR Activity Selection
               </Typography>
             </Box>
-            <Typography variant="body1" color="text.secondary" paragraph>
-              Aligned with NCERT School Kits (UPMK, SMK, UPSK, SSK) & Science Lab Manuals
+
+            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 650, mx: "auto", mb: 3 }}>
+              Select an interactive 3D WebAR lesson module to launch in your classroom.
             </Typography>
 
-            <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+            {/* Filter Chips Bar */}
+            <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" useFlexGap sx={{ mb: 2.5 }}>
               <Chip
                 icon={<MenuBookIcon fontSize="small" />}
                 label="All Modules"
                 color={ncertFilter === "all" ? "primary" : "default"}
                 onClick={() => setNcertFilter("all")}
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 700, px: 0.5 }}
               />
               <Chip
                 label="NCERT Math Kits (UPMK/SMK)"
                 color={ncertFilter === "ncert-math" ? "primary" : "default"}
                 onClick={() => setNcertFilter("ncert-math")}
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 700, px: 0.5 }}
               />
               <Chip
                 label="NCERT Science Kits (UPSK/SSK)"
                 color={ncertFilter === "ncert-sci" ? "secondary" : "default"}
                 onClick={() => setNcertFilter("ncert-sci")}
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 700, px: 0.5 }}
               />
               <Chip
                 label="Teacher Custom Modules"
                 color={ncertFilter === "custom" ? "info" : "default"}
                 onClick={() => setNcertFilter("custom")}
-                sx={{ fontWeight: 600 }}
+                sx={{ fontWeight: 700, px: 0.5 }}
               />
             </Stack>
 
@@ -203,7 +226,7 @@ export default function Activity() {
               color="primary"
               startIcon={<AddCircleOutlinedIcon />}
               onClick={() => setShowBuilderModal(true)}
-              sx={{ borderRadius: 3, fontWeight: 700, mt: 1 }}
+              sx={{ borderRadius: 3, fontWeight: 700, textTransform: "none", py: 0.8, px: 2.5 }}
             >
               Create Custom Activity
             </Button>
@@ -226,7 +249,7 @@ export default function Activity() {
 
           {/* Activity Grid */}
           {filteredActivities.length > 0 ? (
-            <Box my={3}>
+            <Box my={4}>
               <ActivityGrid
                 activities={filteredActivities}
                 selectedActivity={localActivity}
@@ -235,14 +258,14 @@ export default function Activity() {
             </Box>
           ) : (
             selectedSubject && selectedGrade && (
-              <Alert severity="info" sx={{ my: 3 }}>
+              <Alert severity="info" sx={{ my: 4 }}>
                 No activities match this NCERT filter. Switch filter or click "Create Custom Activity"!
               </Alert>
             )
           )}
 
           {/* Bottom Actions */}
-          <Box mt={5} textAlign="center">
+          <Box mt={6} textAlign="center">
             <Button
               variant="contained"
               size="large"
@@ -250,10 +273,17 @@ export default function Activity() {
               endIcon={<ArrowForwardIcon />}
               onClick={handleContinue}
               sx={{
-                px: 6,
-                py: 1.5,
-                fontSize: "1.1rem",
-                borderRadius: 3,
+                px: 7,
+                py: 1.8,
+                fontSize: "1.15rem",
+                borderRadius: 4,
+                fontWeight: 800,
+                boxShadow: "0 10px 28px rgba(21, 101, 192, 0.35)",
+                textTransform: "none",
+                "&:hover": {
+                  boxShadow: "0 14px 34px rgba(21, 101, 192, 0.45)",
+                  transform: "translateY(-2px)",
+                },
               }}
             >
               View Activity Instructions

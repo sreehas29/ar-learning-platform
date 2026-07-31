@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -16,7 +17,9 @@ import HomeIcon from "@mui/icons-material/Home";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import { useNavigate, useLocation } from "react-router-dom";
+
 import { useApp } from "../../context/AppContext";
+import AnalyticsModal from "../dashboard/AnalyticsModal";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -30,119 +33,136 @@ export default function Navbar() {
     toggleAudioMute,
   } = useApp();
 
+  const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+
   const handleReset = () => {
     resetSelection();
     navigate("/");
   };
 
   return (
-    <AppBar
-      position="sticky"
-      elevation={2}
-      sx={{
-        backgroundColor: "#FFFFFF",
-        color: "text.primary",
-        borderBottom: "1px solid #E2E8F0",
-      }}
-    >
-      <Toolbar sx={{ justifyContent: "space-between", py: 0.5 }}>
-        {/* Brand Logo & Name */}
-        <Box
-          display="flex"
-          alignItems="center"
-          gap={1.5}
-          onClick={() => navigate("/")}
-          sx={{ cursor: "pointer" }}
-        >
+    <>
+      <AppBar
+        position="sticky"
+        elevation={2}
+        sx={{
+          backgroundColor: "#FFFFFF",
+          color: "text.primary",
+          borderBottom: "1px solid #E2E8F0",
+        }}
+      >
+        <Toolbar sx={{ justifyContent: "space-between", py: 0.5 }}>
+          {/* Brand Logo & Name */}
           <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              p: 1,
-              borderRadius: 2.5,
-              backgroundColor: "#1565C0",
-              color: "#FFFFFF",
-            }}
+            display="flex"
+            alignItems="center"
+            gap={1.5}
+            onClick={() => navigate("/")}
+            sx={{ cursor: "pointer" }}
           >
-            <ViewInArIcon fontSize="medium" />
-          </Box>
-
-          <Box>
-            <Typography variant="h6" fontWeight={800} color="primary" sx={{ lineHeight: 1.1 }}>
-              AR EduPlatform
-            </Typography>
-            <Typography variant="caption" color="text.secondary" fontWeight={500}>
-              Interactive 3D WebAR Learning
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Center Breadcrumbs / Active Context Badge */}
-        <Stack direction="row" spacing={1} alignItems="center" display={{ xs: "none", md: "flex" }}>
-          {selectedSubject && (
-            <Chip
-              label={`Subject: ${selectedSubject.toUpperCase()}`}
-              size="small"
-              color="primary"
-              variant="outlined"
-              sx={{ fontWeight: 600 }}
-            />
-          )}
-
-          {selectedGrade && (
-            <Chip
-              icon={<SchoolIcon fontSize="small" />}
-              label={`Grade ${selectedGrade}`}
-              size="small"
-              color="info"
-              variant="outlined"
-              sx={{ fontWeight: 600 }}
-            />
-          )}
-        </Stack>
-
-        {/* Right Actions: Audio Mute + Completed Counter + Home + Reset */}
-        <Stack direction="row" spacing={1.2} alignItems="center">
-          <Tooltip title={isAudioMuted ? "Unmute Voice Narration" : "Mute Voice Narration"}>
-            <IconButton
-              color={isAudioMuted ? "default" : "primary"}
-              onClick={toggleAudioMute}
-              size="small"
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                p: 1,
+                borderRadius: 2.5,
+                backgroundColor: "#1565C0",
+                color: "#FFFFFF",
+              }}
             >
-              {isAudioMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
-            </IconButton>
-          </Tooltip>
+              <ViewInArIcon fontSize="medium" />
+            </Box>
 
-          <Chip
-            icon={<EmojiEventsIcon style={{ color: "#D97706" }} />}
-            label={`${completedActivities?.length || 0} Completed`}
-            size="small"
-            sx={{
-              backgroundColor: "#FEF3C7",
-              color: "#92400E",
-              fontWeight: 700,
-              px: 0.5,
-            }}
-          />
+            <Box>
+              <Typography variant="h6" fontWeight={800} color="primary" sx={{ lineHeight: 1.1 }}>
+                AR EduPlatform
+              </Typography>
+              <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                Interactive 3D WebAR Learning
+              </Typography>
+            </Box>
+          </Box>
 
-          {location.pathname !== "/" && (
-            <Tooltip title="Go to Home">
-              <IconButton color="primary" onClick={() => navigate("/")} size="small">
-                <HomeIcon />
+          {/* Center Breadcrumbs / Active Context Badge */}
+          <Stack direction="row" spacing={1} alignItems="center" display={{ xs: "none", md: "flex" }}>
+            {selectedSubject && (
+              <Chip
+                label={`Subject: ${selectedSubject.toUpperCase()}`}
+                size="small"
+                color="primary"
+                variant="outlined"
+                sx={{ fontWeight: 600 }}
+              />
+            )}
+
+            {selectedGrade && (
+              <Chip
+                icon={<SchoolIcon fontSize="small" />}
+                label={`Grade ${selectedGrade}`}
+                size="small"
+                color="info"
+                variant="outlined"
+                sx={{ fontWeight: 600 }}
+              />
+            )}
+          </Stack>
+
+          {/* Right Actions: Audio Mute + Analytics Badge + Home + Reset */}
+          <Stack direction="row" spacing={1.2} alignItems="center">
+            <Tooltip title={isAudioMuted ? "Unmute Voice Narration" : "Mute Voice Narration"}>
+              <IconButton
+                color={isAudioMuted ? "default" : "primary"}
+                onClick={toggleAudioMute}
+                size="small"
+              >
+                {isAudioMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
               </IconButton>
             </Tooltip>
-          )}
 
-          {(selectedSubject || selectedGrade) && (
-            <Tooltip title="Reset Selections">
-              <IconButton color="secondary" onClick={handleReset} size="small">
-                <RestartAltIcon />
-              </IconButton>
+            <Tooltip title="View Performance & NCERT Progress Analytics">
+              <Chip
+                icon={<EmojiEventsIcon style={{ color: "#D97706" }} />}
+                label={`${completedActivities?.length || 0} Completed`}
+                size="small"
+                onClick={() => setShowAnalyticsModal(true)}
+                sx={{
+                  backgroundColor: "#FEF3C7",
+                  color: "#92400E",
+                  fontWeight: 700,
+                  px: 0.5,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "#FDE68A",
+                  },
+                }}
+              />
             </Tooltip>
-          )}
-        </Stack>
-      </Toolbar>
-    </AppBar>
+
+            {location.pathname !== "/" && (
+              <Tooltip title="Go to Home">
+                <IconButton color="primary" onClick={() => navigate("/")} size="small">
+                  <HomeIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+
+            {(selectedSubject || selectedGrade) && (
+              <Tooltip title="Reset Selections">
+                <IconButton color="secondary" onClick={handleReset} size="small">
+                  <RestartAltIcon />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Stack>
+        </Toolbar>
+      </AppBar>
+
+      {/* Classroom Progress Analytics Modal */}
+      <AnalyticsModal
+        open={showAnalyticsModal}
+        onClose={() => setShowAnalyticsModal(false)}
+      />
+    </>
   );
 }

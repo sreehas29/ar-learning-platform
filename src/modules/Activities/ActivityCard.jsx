@@ -17,7 +17,10 @@ export default function ActivityCard({
   selected,
   onClick,
 }) {
-  const { title, description, duration, difficulty, topics, arType, ncertCode } = activity;
+  const { title, description, duration, difficulty, topics, arType, ncertCode, subject } = activity;
+
+  const isMath = subject === "math";
+  const accentColor = isMath ? "#1565C0" : "#00897B";
 
   const difficultyColor = {
     Easy: "success",
@@ -33,18 +36,22 @@ export default function ActivityCard({
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
-        border: selected ? "2px solid #1565C0" : "1px solid #E0E0E0",
-        backgroundColor: selected ? "#F0F7FF" : "#FFFFFF",
-        transition: "all 0.25s ease-in-out",
+        border: selected ? `2.5px solid ${accentColor}` : "1.5px solid #E2E8F0",
+        backgroundColor: selected ? (isMath ? "#F0F7FF" : "#E0F2F1") : "#FFFFFF",
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         borderRadius: 4,
         position: "relative",
+        overflow: "hidden",
         "&:hover": {
-          boxShadow: 8,
-          transform: "translateY(-4px)",
-          borderColor: "#1565C0",
+          boxShadow: `0 12px 28px ${isMath ? "rgba(21, 101, 192, 0.2)" : "rgba(0, 137, 123, 0.2)"}`,
+          transform: "translateY(-6px)",
+          borderColor: accentColor,
         },
       }}
     >
+      {/* Top Accent Strip */}
+      <Box sx={{ height: 5, backgroundColor: accentColor }} />
+
       <CardActionArea
         onClick={onClick}
         sx={{
@@ -66,8 +73,8 @@ export default function ActivityCard({
                 justifyContent: "center",
                 p: 1,
                 borderRadius: 3,
-                backgroundColor: selected ? "#1565C0" : "#E3F2FD",
-                color: selected ? "#FFFFFF" : "#1565C0",
+                backgroundColor: selected ? accentColor : (isMath ? "#E3F2FD" : "#E0F2F1"),
+                color: selected ? "#FFFFFF" : accentColor,
               }}
             >
               <ViewInArIcon fontSize="medium" />
@@ -76,11 +83,11 @@ export default function ActivityCard({
             <Stack direction="row" spacing={1} alignItems="center">
               {ncertCode && (
                 <Chip
-                  icon={<BookmarkIcon fontSize="small" style={{ color: "#1565C0" }} />}
+                  icon={<BookmarkIcon fontSize="small" style={{ color: accentColor }} />}
                   label={ncertCode}
                   size="small"
                   variant="outlined"
-                  sx={{ fontWeight: 700, borderColor: "#1565C0", color: "#1565C0", fontSize: "0.725rem" }}
+                  sx={{ fontWeight: 700, borderColor: accentColor, color: accentColor, fontSize: "0.725rem" }}
                 />
               )}
               <Chip
@@ -90,17 +97,17 @@ export default function ActivityCard({
                 variant={selected ? "filled" : "outlined"}
                 sx={{ fontWeight: 600 }}
               />
-              {selected && <CheckCircleIcon color="primary" fontSize="medium" />}
+              {selected && <CheckCircleIcon style={{ color: accentColor }} fontSize="medium" />}
             </Stack>
           </Box>
 
           {/* Activity Title */}
-          <Typography variant="h6" component="h2" gutterBottom sx={{ fontWeight: 600 }}>
+          <Typography variant="h6" component="h2" gutterBottom sx={{ fontWeight: 700, color: selected ? accentColor : "text.primary" }}>
             {title}
           </Typography>
 
           {/* Description */}
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2, fontSize: "0.85rem", lineHeight: 1.5 }}>
             {description}
           </Typography>
 
@@ -111,7 +118,7 @@ export default function ActivityCard({
                 key={topic}
                 label={topic}
                 size="small"
-                sx={{ fontSize: "0.75rem", backgroundColor: "#F5F5F5" }}
+                sx={{ fontSize: "0.725rem", backgroundColor: "#F1F5F9", fontWeight: 500 }}
               />
             ))}
           </Stack>
@@ -128,7 +135,7 @@ export default function ActivityCard({
         >
           <Box display="flex" alignItems="center" gap={0.5} color="text.secondary">
             <AccessTimeIcon fontSize="small" />
-            <Typography variant="caption" fontWeight={500}>
+            <Typography variant="caption" fontWeight={600}>
               {duration}
             </Typography>
           </Box>
@@ -136,9 +143,8 @@ export default function ActivityCard({
           <Chip
             label={arType}
             size="small"
-            color="primary"
             variant="outlined"
-            sx={{ fontSize: "0.7rem", fontWeight: 600 }}
+            sx={{ fontSize: "0.7rem", fontWeight: 700, borderColor: accentColor, color: accentColor }}
           />
         </Box>
       </CardActionArea>

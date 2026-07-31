@@ -70,7 +70,7 @@ export default function Instructions() {
   ];
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#F5F7FA" }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#F8FAFC" }}>
       <Navbar />
 
       <Box
@@ -79,17 +79,20 @@ export default function Instructions() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(135deg, #F5F7FA 0%, #E3F2FD 100%)",
-          p: 3,
+          background: "radial-gradient(circle at 50% 0%, #E3F2FD 0%, #F8FAFC 70%)",
+          p: { xs: 2, md: 4 },
         }}
       >
         <Paper
-          elevation={6}
+          elevation={8}
           sx={{
             width: "100%",
-            maxWidth: 1000,
-            p: { xs: 3, md: 5 },
-            borderRadius: 5,
+            maxWidth: 1050,
+            p: { xs: 3, sm: 5, md: 6 },
+            borderRadius: 6,
+            backgroundColor: "#FFFFFF",
+            boxShadow: "0 20px 50px rgba(15, 23, 42, 0.08)",
+            border: "1px solid rgba(226, 232, 240, 0.8)",
           }}
         >
           {/* Navigation & Header */}
@@ -104,18 +107,18 @@ export default function Instructions() {
             <Button
               startIcon={<ArrowBackIcon />}
               onClick={handleBackToActivities}
-              sx={{ color: "text.secondary" }}
+              sx={{ color: "text.secondary", textTransform: "none", fontWeight: 600 }}
             >
-              Back to Activities
+              Back to Activity Selection
             </Button>
 
-            <Stack direction="row" spacing={1} alignItems="center">
+            <Stack direction="row" spacing={1.5} alignItems="center">
               {selectedSubject && (
                 <Chip
                   label={`Subject: ${selectedSubject.toUpperCase()}`}
                   color="primary"
                   variant="outlined"
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 700 }}
                 />
               )}
               {selectedGrade && (
@@ -123,7 +126,7 @@ export default function Instructions() {
                   label={`Grade ${selectedGrade}`}
                   color="info"
                   variant="outlined"
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 700 }}
                 />
               )}
             </Stack>
@@ -150,32 +153,33 @@ export default function Instructions() {
               <Paper
                 variant="outlined"
                 sx={{
-                  p: 3,
+                  p: 3.5,
                   mb: 4,
-                  borderRadius: 4,
+                  borderRadius: 5,
                   backgroundColor: "#F8FAFC",
                   borderColor: "#1565C0",
+                  boxShadow: "0 8px 24px rgba(21, 101, 192, 0.08)",
                 }}
               >
                 <Grid container spacing={3} alignItems="center">
                   <Grid item xs={12} md={8}>
                     <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-                      <ViewInArIcon color="primary" sx={{ fontSize: 32 }} />
-                      <Typography variant="h5" fontWeight={700} color="primary">
+                      <ViewInArIcon color="primary" sx={{ fontSize: 36 }} />
+                      <Typography variant="h4" fontWeight={800} color="primary">
                         {selectedActivity.title}
                       </Typography>
                     </Box>
-                    <Typography variant="body1" color="text.secondary" paragraph>
+                    <Typography variant="body1" color="text.secondary" paragraph sx={{ fontSize: "1rem", lineHeight: 1.6 }}>
                       {selectedActivity.description}
                     </Typography>
 
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap mb={2}>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap mb={2.5}>
                       {selectedActivity.topics?.map((topic) => (
                         <Chip
                           key={topic}
                           label={topic}
                           size="small"
-                          sx={{ fontWeight: 500 }}
+                          sx={{ fontWeight: 600, backgroundColor: "#E2E8F0" }}
                         />
                       ))}
                     </Stack>
@@ -186,7 +190,7 @@ export default function Instructions() {
                       color="primary"
                       startIcon={<VolumeUpIcon />}
                       onClick={handleListenObjective}
-                      sx={{ borderRadius: 3, textTransform: "none", fontWeight: 700 }}
+                      sx={{ borderRadius: 3, textTransform: "none", fontWeight: 700, px: 2 }}
                     >
                       Listen to Voice Guidance
                     </Button>
@@ -199,12 +203,12 @@ export default function Instructions() {
                           icon={<MenuBookIcon fontSize="small" style={{ color: "#FFFFFF" }} />}
                           label={selectedActivity.ncertCode}
                           color="primary"
-                          sx={{ fontWeight: 700 }}
+                          sx={{ fontWeight: 800, py: 2, fontSize: "0.875rem" }}
                         />
                       )}
                       <Box display="flex" alignItems="center" gap={1}>
                         <AccessTimeIcon fontSize="small" color="action" />
-                        <Typography variant="body2">
+                        <Typography variant="body2" fontWeight={500}>
                           Duration: <strong>{selectedActivity.duration}</strong>
                         </Typography>
                       </Box>
@@ -213,12 +217,14 @@ export default function Instructions() {
                           label={`Difficulty: ${selectedActivity.difficulty}`}
                           size="small"
                           color="info"
+                          sx={{ fontWeight: 600 }}
                         />
                         <Chip
                           label={selectedActivity.arType}
                           size="small"
                           color="secondary"
                           variant="outlined"
+                          sx={{ fontWeight: 700 }}
                         />
                       </Box>
                     </Stack>
@@ -231,30 +237,31 @@ export default function Instructions() {
                 <Paper
                   elevation={0}
                   sx={{
-                    p: 3,
+                    p: 3.5,
                     mb: 4,
-                    borderRadius: 4,
+                    borderRadius: 5,
                     backgroundColor: "#FEFCE8",
-                    border: "1px solid #FDE047",
+                    border: "1.5px solid #FDE047",
+                    boxShadow: "0 6px 20px rgba(234, 179, 8, 0.12)",
                   }}
                 >
                   <Box display="flex" alignItems="center" gap={1} mb={1.5}>
-                    <BuildCircleIcon style={{ color: "#CA8A04" }} />
-                    <Typography variant="h6" fontWeight={700} color="#854D0E">
+                    <BuildCircleIcon style={{ color: "#CA8A04", fontSize: 28 }} />
+                    <Typography variant="h6" fontWeight={800} color="#854D0E">
                       Official NCERT Lab Manual & School Kit Reference
                     </Typography>
                   </Box>
 
-                  <Typography variant="subtitle2" fontWeight={700} color="#A16207" gutterBottom>
+                  <Typography variant="subtitle1" fontWeight={700} color="#A16207" gutterBottom>
                     NCERT Kit Standard: {selectedActivity.ncertKitName} ({selectedActivity.ncertCode})
                   </Typography>
 
-                  <Typography variant="body2" color="#713F12" paragraph>
+                  <Typography variant="body1" color="#713F12" paragraph sx={{ fontSize: "0.95rem" }}>
                     <strong>NCERT Objective:</strong> {selectedActivity.ncertObjective}
                   </Typography>
 
-                  <Typography variant="caption" fontWeight={700} color="#854D0E" display="block" mb={0.5}>
-                    Physical Kit Apparatus Items Simulated in WebAR:
+                  <Typography variant="caption" fontWeight={800} color="#854D0E" display="block" mb={1} sx={{ fontSize: "0.75rem", letterSpacing: 0.5 }}>
+                    PHYSICAL KIT APPARATUS ITEMS SIMULATED IN WEBAR:
                   </Typography>
                   <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
                     {selectedActivity.ncertApparatus?.map((item) => (
@@ -262,7 +269,7 @@ export default function Instructions() {
                         key={item}
                         label={item}
                         size="small"
-                        sx={{ backgroundColor: "#FEF08A", color: "#713F12", fontWeight: 600 }}
+                        sx={{ backgroundColor: "#FEF08A", color: "#713F12", fontWeight: 700, fontSize: "0.75rem" }}
                       />
                     ))}
                   </Stack>
@@ -270,40 +277,47 @@ export default function Instructions() {
               )}
 
               {/* Preparation Steps */}
-              <Typography variant="h6" fontWeight={700} mb={2}>
+              <Typography variant="h5" fontWeight={800} mb={2.5}>
                 Classroom & AR Setup Guidelines
               </Typography>
 
-              <Grid container spacing={2} mb={4}>
+              <Grid container spacing={2.5} mb={4}>
                 {setupSteps.map((step, idx) => (
                   <Grid item xs={12} sm={6} key={step.title}>
                     <Paper
                       elevation={1}
                       sx={{
-                        p: 2.5,
+                        p: 3,
                         height: "100%",
-                        borderRadius: 3,
+                        borderRadius: 4,
                         display: "flex",
                         gap: 2,
                         alignItems: "flex-start",
                         border: "1px solid #E2E8F0",
+                        transition: "transform 0.2s ease, boxShadow 0.2s ease",
+                        "&:hover": {
+                          transform: "translateY(-4px)",
+                          boxShadow: "0 10px 24px rgba(0, 0, 0, 0.08)",
+                        },
                       }}
                     >
                       <Box
                         sx={{
-                          p: 1.2,
-                          borderRadius: 2,
+                          p: 1.5,
+                          borderRadius: 3,
                           backgroundColor: "#E3F2FD",
                           display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
                         {step.icon}
                       </Box>
                       <Box>
-                        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                        <Typography variant="subtitle1" fontWeight={700} gutterBottom color="primary">
                           {idx + 1}. {step.title}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.85rem", lineHeight: 1.5 }}>
                           {step.description}
                         </Typography>
                       </Box>
@@ -313,7 +327,7 @@ export default function Instructions() {
               </Grid>
 
               {/* Launch Action */}
-              <Box textAlign="center" mt={4}>
+              <Box textAlign="center" mt={5}>
                 <Button
                   variant="contained"
                   color="primary"
@@ -321,13 +335,15 @@ export default function Instructions() {
                   startIcon={<PlayArrowIcon fontSize="large" />}
                   onClick={handleLaunchAR}
                   sx={{
-                    px: 6,
-                    py: 1.8,
+                    px: 7,
+                    py: 2,
                     fontSize: "1.2rem",
+                    fontWeight: 800,
                     borderRadius: 4,
-                    boxShadow: "0 8px 24px rgba(21, 101, 192, 0.3)",
+                    boxShadow: "0 12px 32px rgba(21, 101, 192, 0.4)",
+                    textTransform: "none",
                     "&:hover": {
-                      boxShadow: "0 12px 28px rgba(21, 101, 192, 0.4)",
+                      boxShadow: "0 16px 36px rgba(21, 101, 192, 0.5)",
                       transform: "translateY(-2px)",
                     },
                   }}

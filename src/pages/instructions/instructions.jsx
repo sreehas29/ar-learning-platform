@@ -18,6 +18,8 @@ import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import TouchAppIcon from "@mui/icons-material/TouchApp";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 
 import { useApp } from "../../context/AppContext";
 import Navbar from "../../components/Layout/Navbar";
@@ -171,6 +173,14 @@ export default function Instructions() {
 
                   <Grid item xs={12} md={4}>
                     <Stack spacing={1.5} sx={{ pl: { md: 2 } }}>
+                      {selectedActivity.ncertCode && (
+                        <Chip
+                          icon={<MenuBookIcon fontSize="small" style={{ color: "#FFFFFF" }} />}
+                          label={selectedActivity.ncertCode}
+                          color="primary"
+                          sx={{ fontWeight: 700 }}
+                        />
+                      )}
                       <Box display="flex" alignItems="center" gap={1}>
                         <AccessTimeIcon fontSize="small" color="action" />
                         <Typography variant="body2">
@@ -194,6 +204,49 @@ export default function Instructions() {
                   </Grid>
                 </Grid>
               </Paper>
+
+              {/* NCERT Lab Manual & Apparatus Reference Card */}
+              {selectedActivity.ncertKitName && (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    mb: 4,
+                    borderRadius: 4,
+                    backgroundColor: "#FEFCE8",
+                    border: "1px solid #FDE047",
+                  }}
+                >
+                  <Box display="flex" alignItems="center" gap={1} mb={1.5}>
+                    <BuildCircleIcon style={{ color: "#CA8A04" }} />
+                    <Typography variant="h6" fontWeight={700} color="#854D0E">
+                      Official NCERT Lab Manual & School Kit Reference
+                    </Typography>
+                  </Box>
+
+                  <Typography variant="subtitle2" fontWeight={700} color="#A16207" gutterBottom>
+                    NCERT Kit Standard: {selectedActivity.ncertKitName} ({selectedActivity.ncertCode})
+                  </Typography>
+
+                  <Typography variant="body2" color="#713F12" paragraph>
+                    <strong>NCERT Objective:</strong> {selectedActivity.ncertObjective}
+                  </Typography>
+
+                  <Typography variant="caption" fontWeight={700} color="#854D0E" display="block" mb={0.5}>
+                    Physical Kit Apparatus Items Simulated in WebAR:
+                  </Typography>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    {selectedActivity.ncertApparatus?.map((item) => (
+                      <Chip
+                        key={item}
+                        label={item}
+                        size="small"
+                        sx={{ backgroundColor: "#FEF08A", color: "#713F12", fontWeight: 600 }}
+                      />
+                    ))}
+                  </Stack>
+                </Paper>
+              )}
 
               {/* Preparation Steps */}
               <Typography variant="h6" fontWeight={700} mb={2}>

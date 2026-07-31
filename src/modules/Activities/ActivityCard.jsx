@@ -10,13 +10,14 @@ import {
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
 
 export default function ActivityCard({
   activity,
   selected,
   onClick,
 }) {
-  const { title, description, duration, difficulty, topics, arType } = activity;
+  const { title, description, duration, difficulty, topics, arType, ncertCode } = activity;
 
   const difficultyColor = {
     Easy: "success",
@@ -56,7 +57,7 @@ export default function ActivityCard({
         }}
       >
         <CardContent sx={{ p: 2.5 }}>
-          {/* Top Bar: Icon + Difficulty + Selected Check */}
+          {/* Top Bar: Icon + NCERT Code + Difficulty + Selected Check */}
           <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
             <Box
               sx={{
@@ -73,6 +74,15 @@ export default function ActivityCard({
             </Box>
 
             <Stack direction="row" spacing={1} alignItems="center">
+              {ncertCode && (
+                <Chip
+                  icon={<BookmarkIcon fontSize="small" style={{ color: "#1565C0" }} />}
+                  label={ncertCode}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontWeight: 700, borderColor: "#1565C0", color: "#1565C0", fontSize: "0.725rem" }}
+                />
+              )}
               <Chip
                 label={difficulty}
                 color={difficultyColor}

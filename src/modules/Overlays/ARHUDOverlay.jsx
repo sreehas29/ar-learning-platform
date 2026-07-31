@@ -90,7 +90,12 @@ export default function ARHUDOverlay({ activity }) {
                 Live AR Analytics
               </Typography>
             </Box>
-            <Chip label="3D Mesh Active" size="small" color="success" sx={{ fontSize: "0.7rem", height: 20 }} />
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              {activity?.ncertCode && (
+                <Chip label={activity.ncertCode} size="small" color="primary" sx={{ fontSize: "0.65rem", height: 20, fontWeight: 700 }} />
+              )}
+              <Chip label="3D Active" size="small" color="success" sx={{ fontSize: "0.65rem", height: 20 }} />
+            </Stack>
           </Box>
 
           <Typography variant="body2" color="rgba(255, 255, 255, 0.8)" sx={{ fontSize: "0.825rem", mb: 1.5 }}>

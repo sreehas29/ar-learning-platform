@@ -10,6 +10,10 @@ export const activitiesData = [
     difficulty: "Easy",
     topics: ["Geometry", "3D Nets", "Volume"],
     arType: "3D Model Inspection",
+    ncertCode: "NCERT-UPMK-01",
+    ncertKitName: "Upper Primary Mathematics Kit (UPMK)",
+    ncertApparatus: ["Plastic 3D Nets", "Geometric Solid Models", "Folding Cutouts"],
+    ncertObjective: "To visualize 2D net representations and unfold them into 3D polyhedra.",
   },
   {
     id: "math-6-2",
@@ -21,6 +25,10 @@ export const activitiesData = [
     difficulty: "Medium",
     topics: ["Measurement", "Surface Area"],
     arType: "Interactive Measurement",
+    ncertCode: "NCERT-UPMK-02",
+    ncertKitName: "Upper Primary Mathematics Kit (UPMK)",
+    ncertApparatus: ["Grid Measuring Sheets", "Unit Cubes Kit", "Centimeter Strips"],
+    ncertObjective: "To derive surface area formulas (Total Surface Area = 2(lb + bh + hl)) empirically.",
   },
 
   // Mathematics Grade 7 & 8
@@ -34,6 +42,10 @@ export const activitiesData = [
     difficulty: "Medium",
     topics: ["Algebra", "Coordinates"],
     arType: "3D Plotter",
+    ncertCode: "NCERT-UPMK-03",
+    ncertKitName: "Upper Primary Mathematics Kit (UPMK)",
+    ncertApparatus: ["3D Coordinate Lattice Frame", "Position Pegs", "X-Y-Z Axes Rods"],
+    ncertObjective: "To understand spatial 3D orientation (x, y, z) and distance vectors.",
   },
   {
     id: "math-8-1",
@@ -45,6 +57,10 @@ export const activitiesData = [
     difficulty: "Hard",
     topics: ["Pythagoras", "Geometry"],
     arType: "3D Proof Visualizer",
+    ncertCode: "NCERT-SMK-01",
+    ncertKitName: "Secondary Mathematics Kit (SMK)",
+    ncertApparatus: ["Right Triangle Base Plate", "Square Acrylic Blocks (a², b², c²)"],
+    ncertObjective: "To verify that the area of hypotenuse square c² equals a² + b² in 3D.",
   },
 
   // Mathematics Grade 9 & 10
@@ -58,6 +74,10 @@ export const activitiesData = [
     difficulty: "Medium",
     topics: ["Trigonometry", "Angles"],
     arType: "Dynamic Geometry",
+    ncertCode: "NCERT-SMK-02",
+    ncertKitName: "Secondary Mathematics Kit (SMK)",
+    ncertApparatus: ["Circular Protractor Plate", "Adjustable Angle Arms", "Trig Ratio Chart"],
+    ncertObjective: "To measure sine, cosine, and tangent ratios on a 3D spatial triangle.",
   },
   {
     id: "math-10-1",
@@ -69,6 +89,10 @@ export const activitiesData = [
     difficulty: "Hard",
     topics: ["Conics", "Calculus Prep"],
     arType: "Interactive Slicer",
+    ncertCode: "NCERT-SMK-03",
+    ncertKitName: "Secondary Mathematics Kit (SMK)",
+    ncertApparatus: ["Double Cone Model", "Acrylic Cutting Plane Sheets"],
+    ncertObjective: "To demonstrate conic section curves created by intersecting cutting planes.",
   },
 
   // Science Grade 6
@@ -82,6 +106,10 @@ export const activitiesData = [
     difficulty: "Easy",
     topics: ["Astronomy", "Planets", "Orbits"],
     arType: "3D Solar System",
+    ncertCode: "NCERT-UPSK-01",
+    ncertKitName: "Upper Primary Science Kit (UPSK)",
+    ncertApparatus: ["Celestial Sphere Globe", "Orbital Wire Racks", "Illuminated Sun Light"],
+    ncertObjective: "To demonstrate revolutionary orbits, axial tilts, and planetary scales.",
   },
   {
     id: "sci-6-2",
@@ -93,6 +121,10 @@ export const activitiesData = [
     difficulty: "Easy",
     topics: ["Biology", "Cells"],
     arType: "3D Cell Anatomy",
+    ncertCode: "NCERT-UPSK-02",
+    ncertKitName: "Upper Primary Science Kit (UPSK)",
+    ncertApparatus: ["Compound Microscope Kit", "Prepared Stained Onion Slides"],
+    ncertObjective: "To identify cell wall, vacuole, nucleus, and chloroplast organelles.",
   },
 
   // Science Grade 7 & 8
@@ -106,6 +138,10 @@ export const activitiesData = [
     difficulty: "Medium",
     topics: ["Anatomy", "Circulatory System"],
     arType: "Animated Anatomy",
+    ncertCode: "NCERT-UPSK-03",
+    ncertKitName: "Upper Primary Science Kit (UPSK)",
+    ncertApparatus: ["3D Dissectible Heart Model", "Stethoscope Kit", "Circulation Chart"],
+    ncertObjective: "To trace oxygenated and deoxygenated blood flow through heart valves.",
   },
   {
     id: "sci-8-1",
@@ -117,6 +153,10 @@ export const activitiesData = [
     difficulty: "Hard",
     topics: ["Chemistry", "Molecules"],
     arType: "Molecular Builder",
+    ncertCode: "NCERT-SSK-03",
+    ncertKitName: "Secondary Science Kit (SSK)",
+    ncertApparatus: ["Molecular Model Kit (MMK)", "Atom Spheres & Bond Pegs"],
+    ncertObjective: "To build 3D ball-and-stick representations of H₂O, CO₂, and CH₄ molecules.",
   },
 
   // Science Grade 9 & 10
@@ -130,6 +170,10 @@ export const activitiesData = [
     difficulty: "Medium",
     topics: ["Physics", "Atomic Structure"],
     arType: "3D Orbit Simulation",
+    ncertCode: "NCERT-SSK-01",
+    ncertKitName: "Secondary Science Kit (SSK)",
+    ncertApparatus: ["Atomic Structure Model Kit", "Subatomic Particles Set"],
+    ncertObjective: "To arrange electrons in K, L, M shells following 2n² electron configuration rules.",
   },
   {
     id: "sci-10-1",
@@ -141,6 +185,10 @@ export const activitiesData = [
     difficulty: "Hard",
     topics: ["Physics", "Optics", "Refraction"],
     arType: "Light Beam Simulation",
+    ncertCode: "NCERT-SSK-02",
+    ncertKitName: "Secondary Science Kit (SSK)",
+    ncertApparatus: ["Optical Bench Kit", "Glass Prism", "Convex/Concave Lenses"],
+    ncertObjective: "To measure angles of incidence, refraction, and spectrum dispersion.",
   },
 ];
 

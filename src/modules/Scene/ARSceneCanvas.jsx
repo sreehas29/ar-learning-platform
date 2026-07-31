@@ -8,6 +8,10 @@ export default function ARSceneCanvas({
   isWireframe = false,
   manualRotation = 0,
   scaleFactor = 1,
+  lightingPreset = "studio",
+  cameraView = "isometric",
+  isAnimPaused = false,
+  animSpeed = 1.0,
 }) {
   const mountRef = useRef(null);
 
@@ -24,7 +28,16 @@ export default function ARSceneCanvas({
     // 2. Scene & Camera Setup
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 5);
+
+    // Set Initial Camera Snap Position
+    if (cameraView === "top") {
+      camera.position.set(0, 6, 0.001);
+    } else if (cameraView === "front") {
+      camera.position.set(0, 0, 6);
+    } else {
+      camera.position.set(3, 3, 5); // Isometric default
+    }
+    camera.lookAt(0, 0, 0);
 
     // 3. WebGL Renderer
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, preserveDrawingBuffer: true });
@@ -33,16 +46,38 @@ export default function ARSceneCanvas({
     renderer.shadowMap.enabled = true;
     container.appendChild(renderer.domElement);
 
-    // 4. Lighting Setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    // 4. Lighting Studio Presets
+    let ambientLight, dirLight, pointLight;
+
+    if (lightingPreset === "contrast") {
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+      dirLight = new THREE.DirectionalLight(0xffffff, 2.5);
+      dirLight.position.set(10, 15, 10);
+      pointLight = new THREE.PointLight(0x38bdf8, 2.0, 12);
+      pointLight.position.set(-8, -5, -4);
+    } else if (lightingPreset === "sunlight") {
+      ambientLight = new THREE.AmbientLight(0xfff7ed, 0.9);
+      dirLight = new THREE.DirectionalLight(0xfacc15, 2.0);
+      dirLight.position.set(8, 12, 5);
+      pointLight = new THREE.PointLight(0xf97316, 1.5, 10);
+      pointLight.position.set(-5, -5, 2);
+    } else if (lightingPreset === "cyber") {
+      ambientLight = new THREE.AmbientLight(0x0f172a, 0.5);
+      dirLight = new THREE.DirectionalLight(0xa855f7, 2.2);
+      dirLight.position.set(-5, 10, 5);
+      pointLight = new THREE.PointLight(0x38bdf8, 2.5, 10);
+      pointLight.position.set(5, -5, 5);
+    } else {
+      // Studio Default
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+      dirLight = new THREE.DirectionalLight(0x38bdf8, 1.5);
+      dirLight.position.set(5, 10, 7);
+      pointLight = new THREE.PointLight(config.primaryColor, 1.2, 10);
+      pointLight.position.set(-5, -5, -2);
+    }
+
     scene.add(ambientLight);
-
-    const dirLight = new THREE.DirectionalLight(0x38bdf8, 1.5);
-    dirLight.position.set(5, 10, 7);
     scene.add(dirLight);
-
-    const pointLight = new THREE.PointLight(config.primaryColor, 1.2, 10);
-    pointLight.position.set(-5, -5, -2);
     scene.add(pointLight);
 
     // 5. Create Dynamic 3D Mesh based on Model Registry Config
@@ -99,7 +134,7 @@ export default function ARSceneCanvas({
       group.add(ringMesh);
 
       const moonGeo = new THREE.SphereGeometry(0.3, 16, 16);
-      const moonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0 });
+      const moonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, wireframe: isWireframe });
       const moonMesh = new THREE.Mesh(moonGeo, moonMat);
       moonMesh.position.set(2.2, 0, 0);
       group.add(moonMesh);
@@ -117,14 +152,14 @@ export default function ARSceneCanvas({
 
       for (let i = 0; i < 3; i++) {
         const ringGeo = new THREE.TorusGeometry(1.6 + i * 0.4, 0.02, 16, 100);
-        const ringMat = new THREE.MeshBasicMaterial({ color: config.secondaryColor });
+        const ringMat = new THREE.MeshBasicMaterial({ color: config.secondaryColor, wireframe: isWireframe });
         const ringMesh = new THREE.Mesh(ringGeo, ringMat);
         ringMesh.rotation.x = (Math.PI / 3) * i;
         ringMesh.rotation.y = (Math.PI / 4) * i;
         group.add(ringMesh);
 
         const electronGeo = new THREE.SphereGeometry(0.12, 16, 16);
-        const electronMat = new THREE.MeshBasicMaterial({ color: config.wireframeColor });
+        const electronMat = new THREE.MeshBasicMaterial({ color: config.wireframeColor, wireframe: isWireframe });
         const electronMesh = new THREE.Mesh(electronGeo, electronMat);
         electronMesh.position.set(1.6 + i * 0.4, 0, 0);
         group.add(electronMesh);
@@ -145,20 +180,25 @@ export default function ARSceneCanvas({
     // 6. Animation Frame Loop
     let animationFrameId;
     let clock = new THREE.Clock();
+    let accumulatedTime = 0;
 
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
-      const elapsedTime = clock.getElapsedTime();
+      const delta = clock.getDelta();
 
-      group.rotation.y = elapsedTime * config.autoRotateSpeed + (manualRotation * Math.PI) / 180;
-      group.rotation.x = Math.sin(elapsedTime * 0.3) * 0.2;
+      if (!isAnimPaused) {
+        accumulatedTime += delta * animSpeed;
+      }
+
+      group.rotation.y = accumulatedTime * config.autoRotateSpeed + (manualRotation * Math.PI) / 180;
+      group.rotation.x = Math.sin(accumulatedTime * 0.3) * 0.2;
 
       const combinedScale = config.initialScale * scaleFactor;
       group.scale.set(combinedScale, combinedScale, combinedScale);
 
       extraObjects.forEach((obj) => {
         if (obj.radius) {
-          const angle = elapsedTime * obj.speed;
+          const angle = accumulatedTime * obj.speed;
           obj.mesh.position.x = Math.cos(angle) * obj.radius;
           obj.mesh.position.z = Math.sin(angle) * obj.radius;
         }
@@ -189,7 +229,7 @@ export default function ARSceneCanvas({
       }
       renderer.dispose();
     };
-  }, [activity, isWireframe, manualRotation, scaleFactor]);
+  }, [activity, isWireframe, manualRotation, scaleFactor, lightingPreset, cameraView, isAnimPaused, animSpeed]);
 
   return (
     <Box

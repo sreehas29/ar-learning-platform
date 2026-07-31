@@ -27,12 +27,14 @@ import { useApp } from "../../context/AppContext";
 import CameraFeed from "../../modules/Camera/CameraFeed";
 import ARSceneCanvas from "../../modules/Scene/ARSceneCanvas";
 import ARHUDOverlay from "../../modules/Overlays/ARHUDOverlay";
+import ARToolbar from "../../modules/Overlays/ARToolbar";
 import MarkerTracker from "../../modules/Tracking/MarkerTracker";
 import { exportCanvasSnapshot } from "../../services/arService";
+import { playSnapshotSound } from "../../services/audioService";
 
 export default function ARView() {
   const navigate = useNavigate();
-  const { selectedSubject, selectedGrade, selectedActivity } = useApp();
+  const { selectedSubject, selectedGrade, selectedActivity, isAudioMuted } = useApp();
 
   const [rotation, setRotation] = useState(0);
   const [scale, setScale] = useState(1);
@@ -40,6 +42,12 @@ export default function ARView() {
   const [isCameraEnabled, setIsCameraEnabled] = useState(true);
   const [trackingMode, setTrackingMode] = useState("marker"); // "marker" | "surface"
   const [snapshotTaken, setSnapshotTaken] = useState(false);
+
+  // Advanced 3D Scene Controls
+  const [lightingPreset, setLightingPreset] = useState("studio"); // "studio" | "contrast" | "sunlight" | "cyber"
+  const [cameraView, setCameraView] = useState("isometric"); // "isometric" | "top" | "front"
+  const [isAnimPaused, setIsAnimPaused] = useState(false);
+  const [animSpeed, setAnimSpeed] = useState(1.0);
 
   const handleExit = () => {
     navigate("/instructions");
@@ -53,6 +61,10 @@ export default function ARView() {
     setRotation(0);
     setScale(1);
     setIsWireframe(false);
+    setLightingPreset("studio");
+    setCameraView("isometric");
+    setIsAnimPaused(false);
+    setAnimSpeed(1.0);
   };
 
   const handleToggleTrackingMode = () => {
@@ -60,7 +72,8 @@ export default function ARView() {
   };
 
   const handleSnapshot = () => {
-    const success = exportCanvasSnapshot(`AR-Lesson-${selectedActivity?.id || "snapshot"}.png`);
+    playSnapshotSound(isAudioMuted);
+    exportCanvasSnapshot(`AR-Lesson-${selectedActivity?.id || "snapshot"}.png`);
     setSnapshotTaken(true);
     setTimeout(() => setSnapshotTaken(false), 3000);
   };
@@ -92,6 +105,10 @@ export default function ARView() {
         isWireframe={isWireframe}
         manualRotation={rotation}
         scaleFactor={scale}
+        lightingPreset={lightingPreset}
+        cameraView={cameraView}
+        isAnimPaused={isAnimPaused}
+        animSpeed={animSpeed}
       />
 
       {/* 3. Optical Marker Tracking System Overlay */}
@@ -103,7 +120,21 @@ export default function ARView() {
       {/* 4. Educational AR Analytics & Quiz Overlay */}
       <ARHUDOverlay activity={selectedActivity} />
 
-      {/* 5. Top Navigation Header Bar */}
+      {/* 5. 3D WebAR Interactive Toolbar */}
+      <ARToolbar
+        isWireframe={isWireframe}
+        onToggleWireframe={() => setIsWireframe(!isWireframe)}
+        lightingPreset={lightingPreset}
+        onChangeLightingPreset={setLightingPreset}
+        cameraView={cameraView}
+        onChangeCameraView={setCameraView}
+        isAnimPaused={isAnimPaused}
+        onToggleAnimPause={() => setIsAnimPaused(!isAnimPaused)}
+        animSpeed={animSpeed}
+        onChangeAnimSpeed={setAnimSpeed}
+      />
+
+      {/* 6. Top Navigation Header Bar */}
       <Box
         sx={{
           p: 2,
@@ -177,24 +208,24 @@ export default function ARView() {
         </Alert>
       )}
 
-      {/* 6. Bottom Floating Interactive Controls Toolbar */}
+      {/* 7. Bottom Quick Action Controls Bar */}
       <Box
         sx={{
-          p: 2,
+          p: 1.5,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
           background: "rgba(15, 23, 42, 0.85)",
           backdropFilter: "blur(12px)",
           borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-          zIndex: 10,
+          zIndex: 9,
         }}
       >
         <Paper
           elevation={0}
           sx={{
-            px: 3,
-            py: 1,
+            px: 2.5,
+            py: 0.5,
             borderRadius: 5,
             backgroundColor: "rgba(30, 41, 59, 0.85)",
             border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -204,25 +235,25 @@ export default function ARView() {
           }}
         >
           <Tooltip title="Rotate 3D Mesh Left">
-            <IconButton color="info" onClick={handleRotateLeft}>
+            <IconButton color="info" onClick={handleRotateLeft} size="small">
               <RotateLeftIcon />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Rotate 3D Mesh Right">
-            <IconButton color="info" onClick={handleRotateRight}>
+            <IconButton color="info" onClick={handleRotateRight} size="small">
               <RotateRightIcon />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Zoom In Mesh">
-            <IconButton color="info" onClick={handleZoomIn}>
+            <IconButton color="info" onClick={handleZoomIn} size="small">
               <ZoomInIcon />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Zoom Out Mesh">
-            <IconButton color="info" onClick={handleZoomOut}>
+            <IconButton color="info" onClick={handleZoomOut} size="small">
               <ZoomOutIcon />
             </IconButton>
           </Tooltip>
@@ -231,6 +262,7 @@ export default function ARView() {
             <IconButton
               color={isWireframe ? "warning" : "default"}
               onClick={() => setIsWireframe(!isWireframe)}
+              size="small"
             >
               <GridViewIcon />
             </IconButton>
@@ -240,19 +272,20 @@ export default function ARView() {
             <IconButton
               color={isCameraEnabled ? "success" : "default"}
               onClick={() => setIsCameraEnabled(!isCameraEnabled)}
+              size="small"
             >
               {isCameraEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Reset Transformations">
-            <IconButton color="secondary" onClick={handleReset}>
+            <IconButton color="secondary" onClick={handleReset} size="small">
               <RestartAltIcon />
             </IconButton>
           </Tooltip>
 
           <Tooltip title="Capture AR Lesson Snapshot">
-            <IconButton color="success" onClick={handleSnapshot}>
+            <IconButton color="success" onClick={handleSnapshot} size="small">
               <CameraAltIcon />
             </IconButton>
           </Tooltip>

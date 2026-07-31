@@ -116,7 +116,7 @@ export default function Navbar() {
 
           <Chip
             icon={<EmojiEventsIcon style={{ color: "#D97706" }} />}
-            label={`${completedActivities.length} Completed`}
+            label={`${completedActivities?.length || 0} Completed`}
             size="small"
             sx={{
               backgroundColor: "#FEF3C7",

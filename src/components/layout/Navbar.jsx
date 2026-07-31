@@ -3,7 +3,6 @@ import {
   Toolbar,
   Typography,
   Box,
-  Button,
   Chip,
   Stack,
   IconButton,
@@ -14,6 +13,8 @@ import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import HomeIcon from "@mui/icons-material/Home";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useApp } from "../../context/AppContext";
 
@@ -25,6 +26,8 @@ export default function Navbar() {
     selectedGrade,
     completedActivities,
     resetSelection,
+    isAudioMuted,
+    toggleAudioMute,
   } = useApp();
 
   const handleReset = () => {
@@ -99,8 +102,18 @@ export default function Navbar() {
           )}
         </Stack>
 
-        {/* Right Actions: Completed Counter + Home + Reset */}
-        <Stack direction="row" spacing={1.5} alignItems="center">
+        {/* Right Actions: Audio Mute + Completed Counter + Home + Reset */}
+        <Stack direction="row" spacing={1.2} alignItems="center">
+          <Tooltip title={isAudioMuted ? "Unmute Voice Narration" : "Mute Voice Narration"}>
+            <IconButton
+              color={isAudioMuted ? "default" : "primary"}
+              onClick={toggleAudioMute}
+              size="small"
+            >
+              {isAudioMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
+            </IconButton>
+          </Tooltip>
+
           <Chip
             icon={<EmojiEventsIcon style={{ color: "#D97706" }} />}
             label={`${completedActivities.length} Completed`}

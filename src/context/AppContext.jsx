@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import { stopSpeech } from "../services/audioService";
 
 const AppContext = createContext();
 
@@ -8,6 +9,7 @@ export function AppProvider({ children }) {
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [completedActivities, setCompletedActivities] = useState([]);
   const [customActivities, setCustomActivities] = useState([]);
+  const [isAudioMuted, setIsAudioMuted] = useState(false);
 
   const markActivityCompleted = (activityId, resultData = {}) => {
     if (!activityId) return;
@@ -33,6 +35,14 @@ export function AppProvider({ children }) {
     setSelectedActivity(null);
   };
 
+  const toggleAudioMute = () => {
+    setIsAudioMuted((prev) => {
+      const next = !prev;
+      if (next) stopSpeech();
+      return next;
+    });
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -47,6 +57,8 @@ export function AppProvider({ children }) {
         customActivities,
         addCustomActivity,
         resetSelection,
+        isAudioMuted,
+        toggleAudioMute,
       }}
     >
       {children}

@@ -22,9 +22,15 @@ import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { getModelConfigForActivity } from "../../registry/modelRegistry";
 import CompletionModal from "./CompletionModal";
 import { useApp } from "../../context/AppContext";
+import {
+  speakText,
+  playSuccessChime,
+  playErrorTone,
+  playClickSound,
+} from "../../services/audioService";
 
 export default function ARHUDOverlay({ activity }) {
-  const { markActivityCompleted, selectedSubject, selectedGrade } = useApp();
+  const { markActivityCompleted, selectedSubject, selectedGrade, isAudioMuted } = useApp();
 
   const [showQuiz, setShowQuiz] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
@@ -45,13 +51,30 @@ export default function ARHUDOverlay({ activity }) {
     correct: "Determine chemical reactivity & bonding",
   };
 
+  const handleHotspotClick = (hs) => {
+    playClickSound(isAudioMuted);
+    if (activeHotspot?.id === hs.id) {
+      setActiveHotspot(null);
+    } else {
+      setActiveHotspot(hs);
+      speakText(`Inspecting hotspot: ${hs.label}`, isAudioMuted);
+    }
+  };
+
   const handleQuizSubmit = () => {
-    if (selectedOption) {
-      setQuizSubmitted(true);
+    if (!selectedOption) return;
+    setQuizSubmitted(true);
+    if (selectedOption === quizData.correct) {
+      playSuccessChime(isAudioMuted);
+      speakText("Correct answer! Great job.", isAudioMuted);
+    } else {
+      playErrorTone(isAudioMuted);
+      speakText("Incorrect. Try observing the model again.", isAudioMuted);
     }
   };
 
   const handleFinishLesson = () => {
+    playSuccessChime(isAudioMuted);
     const score = quizSubmitted && selectedOption === quizData.correct ? "100% (Passed)" : "Completed";
     markActivityCompleted(activity?.id, { score });
     setShowCompletionModal(true);
@@ -119,7 +142,7 @@ export default function ARHUDOverlay({ activity }) {
                 icon={<LocationOnIcon fontSize="small" style={{ color: activeHotspot?.id === hs.id ? "#FFFFFF" : "#38BDF8" }} />}
                 label={hs.label}
                 size="small"
-                onClick={() => setActiveHotspot(activeHotspot?.id === hs.id ? null : hs)}
+                onClick={() => handleHotspotClick(hs)}
                 color={activeHotspot?.id === hs.id ? "primary" : "default"}
                 variant={activeHotspot?.id === hs.id ? "filled" : "outlined"}
                 sx={{

@@ -20,13 +20,15 @@ import TouchAppIcon from "@mui/icons-material/TouchApp";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 
 import { useApp } from "../../context/AppContext";
 import Navbar from "../../components/Layout/Navbar";
+import { speakText } from "../../services/audioService";
 
 export default function Instructions() {
   const navigate = useNavigate();
-  const { selectedSubject, selectedGrade, selectedActivity } = useApp();
+  const { selectedSubject, selectedGrade, selectedActivity, isAudioMuted } = useApp();
 
   const handleLaunchAR = () => {
     navigate("/ar");
@@ -34,6 +36,14 @@ export default function Instructions() {
 
   const handleBackToActivities = () => {
     navigate("/activity");
+  };
+
+  const handleListenObjective = () => {
+    if (!selectedActivity) return;
+    const textToSpeak = `Lesson Activity: ${selectedActivity.title}. ${selectedActivity.description}. ${
+      selectedActivity.ncertObjective ? `NCERT Objective: ${selectedActivity.ncertObjective}` : ""
+    }`;
+    speakText(textToSpeak, isAudioMuted);
   };
 
   const setupSteps = [
@@ -159,7 +169,7 @@ export default function Instructions() {
                       {selectedActivity.description}
                     </Typography>
 
-                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap mb={2}>
                       {selectedActivity.topics?.map((topic) => (
                         <Chip
                           key={topic}
@@ -169,6 +179,17 @@ export default function Instructions() {
                         />
                       ))}
                     </Stack>
+
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="primary"
+                      startIcon={<VolumeUpIcon />}
+                      onClick={handleListenObjective}
+                      sx={{ borderRadius: 3, textTransform: "none", fontWeight: 700 }}
+                    >
+                      Listen to Voice Guidance
+                    </Button>
                   </Grid>
 
                   <Grid item xs={12} md={4}>

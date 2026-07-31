@@ -9,10 +9,6 @@ import {
   Divider,
   Grid,
   Stack,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
@@ -24,6 +20,7 @@ import TouchAppIcon from "@mui/icons-material/TouchApp";
 import CenterFocusStrongIcon from "@mui/icons-material/CenterFocusStrong";
 
 import { useApp } from "../../context/AppContext";
+import Navbar from "../../components/Layout/Navbar";
 
 export default function Instructions() {
   const navigate = useNavigate();
@@ -61,209 +58,213 @@ export default function Instructions() {
   ];
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "linear-gradient(135deg, #F5F7FA 0%, #E3F2FD 100%)",
-        p: 3,
-      }}
-    >
-      <Paper
-        elevation={6}
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#F5F7FA" }}>
+      <Navbar />
+
+      <Box
         sx={{
-          width: "100%",
-          maxWidth: 1000,
-          p: { xs: 3, md: 5 },
-          borderRadius: 5,
+          minHeight: "calc(100vh - 70px)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "linear-gradient(135deg, #F5F7FA 0%, #E3F2FD 100%)",
+          p: 3,
         }}
       >
-        {/* Navigation & Header */}
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          mb={3}
-          flexWrap="wrap"
-          gap={2}
+        <Paper
+          elevation={6}
+          sx={{
+            width: "100%",
+            maxWidth: 1000,
+            p: { xs: 3, md: 5 },
+            borderRadius: 5,
+          }}
         >
-          <Button
-            startIcon={<ArrowBackIcon />}
-            onClick={handleBackToActivities}
-            sx={{ color: "text.secondary" }}
+          {/* Navigation & Header */}
+          <Box
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
+            mb={3}
+            flexWrap="wrap"
+            gap={2}
           >
-            Back to Activities
-          </Button>
-
-          <Stack direction="row" spacing={1} alignItems="center">
-            {selectedSubject && (
-              <Chip
-                label={`Subject: ${selectedSubject.toUpperCase()}`}
-                color="primary"
-                variant="outlined"
-                sx={{ fontWeight: 600 }}
-              />
-            )}
-            {selectedGrade && (
-              <Chip
-                label={`Grade ${selectedGrade}`}
-                color="info"
-                variant="outlined"
-                sx={{ fontWeight: 600 }}
-              />
-            )}
-          </Stack>
-        </Box>
-
-        <Divider sx={{ mb: 4 }} />
-
-        {/* Guard Alert */}
-        {!selectedActivity ? (
-          <Alert
-            severity="warning"
-            sx={{ mb: 4 }}
-            action={
-              <Button color="inherit" size="small" onClick={handleBackToActivities}>
-                Select Activity
-              </Button>
-            }
-          >
-            No activity selected. Please choose an activity from the activity list first.
-          </Alert>
-        ) : (
-          <>
-            {/* Activity Summary Banner */}
-            <Paper
-              variant="outlined"
-              sx={{
-                p: 3,
-                mb: 4,
-                borderRadius: 4,
-                backgroundColor: "#F8FAFC",
-                borderColor: "#1565C0",
-              }}
+            <Button
+              startIcon={<ArrowBackIcon />}
+              onClick={handleBackToActivities}
+              sx={{ color: "text.secondary" }}
             >
-              <Grid container spacing={3} alignItems="center">
-                <Grid item xs={12} md={8}>
-                  <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-                    <ViewInArIcon color="primary" sx={{ fontSize: 32 }} />
-                    <Typography variant="h5" fontWeight={700} color="primary">
-                      {selectedActivity.title}
-                    </Typography>
-                  </Box>
-                  <Typography variant="body1" color="text.secondary" paragraph>
-                    {selectedActivity.description}
-                  </Typography>
+              Back to Activities
+            </Button>
 
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                    {selectedActivity.topics?.map((topic) => (
-                      <Chip
-                        key={topic}
-                        label={topic}
-                        size="small"
-                        sx={{ fontWeight: 500 }}
-                      />
-                    ))}
-                  </Stack>
-                </Grid>
+            <Stack direction="row" spacing={1} alignItems="center">
+              {selectedSubject && (
+                <Chip
+                  label={`Subject: ${selectedSubject.toUpperCase()}`}
+                  color="primary"
+                  variant="outlined"
+                  sx={{ fontWeight: 600 }}
+                />
+              )}
+              {selectedGrade && (
+                <Chip
+                  label={`Grade ${selectedGrade}`}
+                  color="info"
+                  variant="outlined"
+                  sx={{ fontWeight: 600 }}
+                />
+              )}
+            </Stack>
+          </Box>
 
-                <Grid item xs={12} md={4}>
-                  <Stack spacing={1.5} sx={{ pl: { md: 2 } }}>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <AccessTimeIcon fontSize="small" color="action" />
-                      <Typography variant="body2">
-                        Duration: <strong>{selectedActivity.duration}</strong>
-                      </Typography>
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Chip
-                        label={`Difficulty: ${selectedActivity.difficulty}`}
-                        size="small"
-                        color="info"
-                      />
-                      <Chip
-                        label={selectedActivity.arType}
-                        size="small"
-                        color="secondary"
-                        variant="outlined"
-                      />
-                    </Box>
-                  </Stack>
-                </Grid>
-              </Grid>
-            </Paper>
+          <Divider sx={{ mb: 4 }} />
 
-            {/* Preparation Steps */}
-            <Typography variant="h6" fontWeight={700} mb={2}>
-              Classroom & AR Setup Guidelines
-            </Typography>
-
-            <Grid container spacing={2} mb={4}>
-              {setupSteps.map((step, idx) => (
-                <Grid item xs={12} sm={6} key={step.title}>
-                  <Paper
-                    elevation={1}
-                    sx={{
-                      p: 2.5,
-                      height: "100%",
-                      borderRadius: 3,
-                      display: "flex",
-                      gap: 2,
-                      alignItems: "flex-start",
-                      border: "1px solid #E2E8F0",
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        p: 1.2,
-                        borderRadius: 2,
-                        backgroundColor: "#E3F2FD",
-                        display: "flex",
-                      }}
-                    >
-                      {step.icon}
-                    </Box>
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-                        {idx + 1}. {step.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {step.description}
-                      </Typography>
-                    </Box>
-                  </Paper>
-                </Grid>
-              ))}
-            </Grid>
-
-            {/* Launch Action */}
-            <Box textAlign="center" mt={4}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                startIcon={<PlayArrowIcon fontSize="large" />}
-                onClick={handleLaunchAR}
+          {/* Guard Alert */}
+          {!selectedActivity ? (
+            <Alert
+              severity="warning"
+              sx={{ mb: 4 }}
+              action={
+                <Button color="inherit" size="small" onClick={handleBackToActivities}>
+                  Select Activity
+                </Button>
+              }
+            >
+              No activity selected. Please choose an activity from the activity list first.
+            </Alert>
+          ) : (
+            <>
+              {/* Activity Summary Banner */}
+              <Paper
+                variant="outlined"
                 sx={{
-                  px: 6,
-                  py: 1.8,
-                  fontSize: "1.2rem",
+                  p: 3,
+                  mb: 4,
                   borderRadius: 4,
-                  boxShadow: "0 8px 24px rgba(21, 101, 192, 0.3)",
-                  "&:hover": {
-                    boxShadow: "0 12px 28px rgba(21, 101, 192, 0.4)",
-                    transform: "translateY(-2px)",
-                  },
+                  backgroundColor: "#F8FAFC",
+                  borderColor: "#1565C0",
                 }}
               >
-                Launch AR Experience
-              </Button>
-            </Box>
-          </>
-        )}
-      </Paper>
+                <Grid container spacing={3} alignItems="center">
+                  <Grid item xs={12} md={8}>
+                    <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                      <ViewInArIcon color="primary" sx={{ fontSize: 32 }} />
+                      <Typography variant="h5" fontWeight={700} color="primary">
+                        {selectedActivity.title}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body1" color="text.secondary" paragraph>
+                      {selectedActivity.description}
+                    </Typography>
+
+                    <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                      {selectedActivity.topics?.map((topic) => (
+                        <Chip
+                          key={topic}
+                          label={topic}
+                          size="small"
+                          sx={{ fontWeight: 500 }}
+                        />
+                      ))}
+                    </Stack>
+                  </Grid>
+
+                  <Grid item xs={12} md={4}>
+                    <Stack spacing={1.5} sx={{ pl: { md: 2 } }}>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <AccessTimeIcon fontSize="small" color="action" />
+                        <Typography variant="body2">
+                          Duration: <strong>{selectedActivity.duration}</strong>
+                        </Typography>
+                      </Box>
+                      <Box display="flex" alignItems="center" gap={1}>
+                        <Chip
+                          label={`Difficulty: ${selectedActivity.difficulty}`}
+                          size="small"
+                          color="info"
+                        />
+                        <Chip
+                          label={selectedActivity.arType}
+                          size="small"
+                          color="secondary"
+                          variant="outlined"
+                        />
+                      </Box>
+                    </Stack>
+                  </Grid>
+                </Grid>
+              </Paper>
+
+              {/* Preparation Steps */}
+              <Typography variant="h6" fontWeight={700} mb={2}>
+                Classroom & AR Setup Guidelines
+              </Typography>
+
+              <Grid container spacing={2} mb={4}>
+                {setupSteps.map((step, idx) => (
+                  <Grid item xs={12} sm={6} key={step.title}>
+                    <Paper
+                      elevation={1}
+                      sx={{
+                        p: 2.5,
+                        height: "100%",
+                        borderRadius: 3,
+                        display: "flex",
+                        gap: 2,
+                        alignItems: "flex-start",
+                        border: "1px solid #E2E8F0",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          p: 1.2,
+                          borderRadius: 2,
+                          backgroundColor: "#E3F2FD",
+                          display: "flex",
+                        }}
+                      >
+                        {step.icon}
+                      </Box>
+                      <Box>
+                        <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                          {idx + 1}. {step.title}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {step.description}
+                        </Typography>
+                      </Box>
+                    </Paper>
+                  </Grid>
+                ))}
+              </Grid>
+
+              {/* Launch Action */}
+              <Box textAlign="center" mt={4}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="large"
+                  startIcon={<PlayArrowIcon fontSize="large" />}
+                  onClick={handleLaunchAR}
+                  sx={{
+                    px: 6,
+                    py: 1.8,
+                    fontSize: "1.2rem",
+                    borderRadius: 4,
+                    boxShadow: "0 8px 24px rgba(21, 101, 192, 0.3)",
+                    "&:hover": {
+                      boxShadow: "0 12px 28px rgba(21, 101, 192, 0.4)",
+                      transform: "translateY(-2px)",
+                    },
+                  }}
+                >
+                  Launch AR Experience
+                </Button>
+              </Box>
+            </>
+          )}
+        </Paper>
+      </Box>
     </Box>
   );
 }

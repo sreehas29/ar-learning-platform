@@ -7,6 +7,7 @@ export function AppProvider({ children }) {
   const [selectedGrade, setSelectedGrade] = useState(null);
   const [selectedActivity, setSelectedActivity] = useState(null);
   const [completedActivities, setCompletedActivities] = useState([]);
+  const [customActivities, setCustomActivities] = useState([]);
 
   const markActivityCompleted = (activityId, resultData = {}) => {
     if (!activityId) return;
@@ -21,6 +22,17 @@ export function AppProvider({ children }) {
     });
   };
 
+  const addCustomActivity = (newActivity) => {
+    if (!newActivity || !newActivity.title) return;
+    setCustomActivities((prev) => [newActivity, ...prev]);
+  };
+
+  const resetSelection = () => {
+    setSelectedSubject(null);
+    setSelectedGrade(null);
+    setSelectedActivity(null);
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -32,6 +44,9 @@ export function AppProvider({ children }) {
         setSelectedActivity,
         completedActivities,
         markActivityCompleted,
+        customActivities,
+        addCustomActivity,
+        resetSelection,
       }}
     >
       {children}

@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid";
+import { Grid } from "@mui/material";
 import ActivityCard from "./ActivityCard";
 
 export default function ActivityGrid({

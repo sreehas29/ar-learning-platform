@@ -1,4 +1,4 @@
-import Grid from "@mui/material/Grid";
+import { Grid } from "@mui/material";
 
 import CalculateIcon from "@mui/icons-material/Calculate";
 import ScienceIcon from "@mui/icons-material/Science";

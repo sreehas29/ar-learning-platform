@@ -8,12 +8,14 @@ import {
   Chip,
   Alert,
   Divider,
+  Stack,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import ScienceIcon from "@mui/icons-material/Science";
 import SchoolIcon from "@mui/icons-material/School";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import VerifiedIcon from "@mui/icons-material/Verified";
 
 import { useApp } from "../../context/AppContext";
 import GradeGrid from "../../components/dashboard/GradeGrid";
@@ -62,7 +64,7 @@ export default function Dashboard() {
   const currentSubject = selectedSubject ? subjectMeta[selectedSubject] : null;
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#F5F7FA" }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#F8FAFC" }}>
       <Navbar />
 
       <Box
@@ -71,17 +73,20 @@ export default function Dashboard() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          background: "linear-gradient(135deg, #F5F7FA 0%, #E3F2FD 100%)",
-          p: 3,
+          background: "radial-gradient(circle at 50% 0%, #E3F2FD 0%, #F8FAFC 70%)",
+          p: { xs: 2, md: 4 },
         }}
       >
         <Paper
-          elevation={6}
+          elevation={8}
           sx={{
             width: "100%",
-            maxWidth: 1000,
-            p: { xs: 3, md: 5 },
-            borderRadius: 5,
+            maxWidth: 1050,
+            p: { xs: 3, sm: 5, md: 6 },
+            borderRadius: 6,
+            backgroundColor: "#FFFFFF",
+            boxShadow: "0 20px 50px rgba(15, 23, 42, 0.08)",
+            border: "1px solid rgba(226, 232, 240, 0.8)",
           }}
         >
           {/* Navigation / Header Bar */}
@@ -96,18 +101,18 @@ export default function Dashboard() {
             <Button
               startIcon={<ArrowBackIcon />}
               onClick={handleBackToHome}
-              sx={{ color: "text.secondary" }}
+              sx={{ color: "text.secondary", textTransform: "none", fontWeight: 600 }}
             >
-              Back to Home
+              Change Subject
             </Button>
 
             {currentSubject ? (
               <Chip
                 icon={currentSubject.icon}
-                label={`Subject: ${currentSubject.name}`}
+                label={`Active Subject: ${currentSubject.name}`}
                 color={currentSubject.color}
                 variant="outlined"
-                sx={{ fontWeight: 600, fontSize: "0.95rem", py: 2, px: 1 }}
+                sx={{ fontWeight: 700, fontSize: "0.95rem", py: 2, px: 1 }}
               />
             ) : (
               <Chip
@@ -115,6 +120,7 @@ export default function Dashboard() {
                 label="No Subject Selected"
                 color="warning"
                 variant="outlined"
+                sx={{ fontWeight: 700 }}
               />
             )}
           </Box>
@@ -123,11 +129,31 @@ export default function Dashboard() {
 
           {/* Title Section */}
           <Box textAlign="center" mb={4}>
-            <Typography variant="h4" component="h1" gutterBottom color="primary" fontWeight={700}>
+            <Chip
+              icon={<VerifiedIcon style={{ color: "#1565C0" }} />}
+              label="Grade-Specific Curriculum Customization"
+              color="primary"
+              variant="outlined"
+              sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.8rem" }}
+            />
+
+            <Typography
+              variant="h3"
+              component="h1"
+              gutterBottom
+              sx={{
+                fontWeight: 900,
+                fontSize: { xs: "2rem", sm: "2.5rem" },
+                background: "linear-gradient(135deg, #0F172A 0%, #1565C0 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
               Teacher Dashboard
             </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Select a grade level (6–10) to customize AR curriculum activities.
+
+            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 650, mx: "auto" }}>
+              Select a target grade level (Grades 6–10) to customize AR curriculum activities and NCERT kits.
             </Typography>
           </Box>
 
@@ -143,7 +169,7 @@ export default function Dashboard() {
           )}
 
           {/* Reusable Grade Selection Grid */}
-          <Box my={3}>
+          <Box my={4}>
             <GradeGrid
               selectedGrade={localGrade}
               onSelectGrade={handleSelectGrade}
@@ -151,7 +177,7 @@ export default function Dashboard() {
           </Box>
 
           {/* Continue Action */}
-          <Box mt={5} textAlign="center">
+          <Box mt={6} textAlign="center">
             <Button
               variant="contained"
               size="large"
@@ -159,13 +185,20 @@ export default function Dashboard() {
               endIcon={<ArrowForwardIcon />}
               onClick={handleContinue}
               sx={{
-                px: 6,
-                py: 1.5,
-                fontSize: "1.1rem",
-                borderRadius: 3,
+                px: 7,
+                py: 1.8,
+                fontSize: "1.15rem",
+                borderRadius: 4,
+                fontWeight: 800,
+                boxShadow: "0 10px 28px rgba(21, 101, 192, 0.35)",
+                textTransform: "none",
+                "&:hover": {
+                  boxShadow: "0 14px 34px rgba(21, 101, 192, 0.45)",
+                  transform: "translateY(-2px)",
+                },
               }}
             >
-              Continue to Activities
+              Continue to Activity Selection
             </Button>
           </Box>
         </Paper>

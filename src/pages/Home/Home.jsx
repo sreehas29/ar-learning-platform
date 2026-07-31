@@ -1,4 +1,4 @@
-import { useNavigate } from "react";
+import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button, Paper, Chip, Stack } from "@mui/material";
 import ViewInArIcon from "@mui/icons-material/ViewInAr";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";

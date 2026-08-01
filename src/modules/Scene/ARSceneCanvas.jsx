@@ -89,10 +89,253 @@ export default function ARSceneCanvas({
     let mainMesh;
     let extraObjects = [];
     let subParts = []; // Sub-components for exploded deconstruction
+    let pulseMesh = null; // For heartbeat animation
 
     const geomType = config.geometryType;
 
-    if (geomType === "box" || geomType === "cylinder" || geomType === "octahedron") {
+    if (geomType === "pythagoras") {
+      // 3D Pythagoras Triangle Base + 3 Volume Squares (a², b², c²)
+      const triShape = new THREE.Shape();
+      triShape.moveTo(0, 0);
+      triShape.lineTo(1.6, 0);
+      triShape.lineTo(0, 1.2);
+      triShape.closePath();
+
+      const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05 };
+      const triGeo = new THREE.ExtrudeGeometry(triShape, extrudeSettings);
+      const triMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, wireframe: isWireframe });
+      mainMesh = new THREE.Mesh(triGeo, triMat);
+      mainMesh.position.set(-0.8, -0.6, 0);
+      group.add(mainMesh);
+
+      // Block A² (Base)
+      const blockAGeo = new THREE.BoxGeometry(1.6, 1.6, 0.4);
+      const blockAMat = new THREE.MeshStandardMaterial({ color: 0x10b981, wireframe: isWireframe });
+      const blockA = new THREE.Mesh(blockAGeo, blockAMat);
+      blockA.position.set(0, -1.4, 0);
+      group.add(blockA);
+      subParts.push({ mesh: blockA, basePos: [0, -1.4, 0], dir: [0, -1, 0] });
+
+      // Block B² (Vertical)
+      const blockBGeo = new THREE.BoxGeometry(1.2, 1.2, 0.4);
+      const blockBMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, wireframe: isWireframe });
+      const blockB = new THREE.Mesh(blockBGeo, blockBMat);
+      blockB.position.set(-1.4, 0, 0);
+      group.add(blockB);
+      subParts.push({ mesh: blockB, basePos: [-1.4, 0, 0], dir: [-1, 0, 0] });
+
+      // Block C² (Hypotenuse)
+      const blockCGeo = new THREE.BoxGeometry(2.0, 2.0, 0.4);
+      const blockCMat = new THREE.MeshStandardMaterial({ color: 0x6366f1, wireframe: isWireframe });
+      const blockC = new THREE.Mesh(blockCGeo, blockCMat);
+      blockC.position.set(0.6, 0.8, 0);
+      blockC.rotation.z = -Math.atan(1.2 / 1.6);
+      group.add(blockC);
+      subParts.push({ mesh: blockC, basePos: [0.6, 0.8, 0], dir: [0.8, 0.8, 0] });
+
+    } else if (geomType === "prism-refraction") {
+      // 3D Glass Prism Refraction + Dispersion Spectrum Rays
+      const prismGeo = new THREE.CylinderGeometry(1.2, 1.2, 2.0, 3);
+      const prismMat = new THREE.MeshPhysicalMaterial({
+        color: 0x93c5fd,
+        transmission: 0.9,
+        opacity: 1,
+        transparent: true,
+        roughness: 0.1,
+        ior: 1.5,
+        wireframe: isWireframe,
+      });
+      mainMesh = new THREE.Mesh(prismGeo, prismMat);
+      group.add(mainMesh);
+
+      // Incident White Beam
+      const beamGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.5);
+      const beamMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      beam.rotation.z = Math.PI / 3;
+      beam.position.set(-1.4, 0, 0);
+      group.add(beam);
+
+      // Spectrum Rainbow Rays
+      const colors = [0xef4444, 0xf97316, 0xeab308, 0x10b981, 0x06b6d4, 0x3b82f6, 0x8b5cf6];
+      colors.forEach((col, idx) => {
+        const rayGeo = new THREE.CylinderGeometry(0.02, 0.02, 2.2);
+        const rayMat = new THREE.MeshBasicMaterial({ color: col });
+        const ray = new THREE.Mesh(rayGeo, rayMat);
+        ray.rotation.z = -Math.PI / 3.5 - idx * 0.04;
+        ray.position.set(1.4, -0.2 + idx * 0.08, 0);
+        group.add(ray);
+        subParts.push({ mesh: ray, basePos: [1.4, -0.2 + idx * 0.08, 0], dir: [1, idx * 0.2, 0] });
+      });
+
+    } else if (geomType === "plant-cell") {
+      // 3D Plant Cell Wall + Nucleus + Chloroplasts + Vacuole
+      const cellWallGeo = new THREE.CylinderGeometry(1.4, 1.4, 1.8, 6);
+      const cellWallMat = new THREE.MeshStandardMaterial({
+        color: 0x15803d,
+        wireframe: isWireframe,
+        transparent: true,
+        opacity: 0.7,
+      });
+      mainMesh = new THREE.Mesh(cellWallGeo, cellWallMat);
+      group.add(mainMesh);
+
+      // Central Nucleus
+      const nucGeo = new THREE.SphereGeometry(0.45, 32, 32);
+      const nucMat = new THREE.MeshStandardMaterial({ color: 0x9333ea, wireframe: isWireframe });
+      const nucMesh = new THREE.Mesh(nucGeo, nucMat);
+      nucMesh.position.set(-0.4, 0, 0);
+      group.add(nucMesh);
+
+      // Vacuole Liquid
+      const vacGeo = new THREE.BoxGeometry(0.8, 1.0, 0.8);
+      const vacMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.6, wireframe: isWireframe });
+      const vacMesh = new THREE.Mesh(vacGeo, vacMat);
+      vacMesh.position.set(0.4, 0, 0);
+      group.add(vacMesh);
+
+      // Chloroplast Discs
+      for (let i = 0; i < 4; i++) {
+        const cpGeo = new THREE.CylinderGeometry(0.18, 0.18, 0.08, 16);
+        const cpMat = new THREE.MeshStandardMaterial({ color: 0x22c55e, wireframe: isWireframe });
+        const cpMesh = new THREE.Mesh(cpGeo, cpMat);
+        const angle = (Math.PI / 2) * i;
+        cpMesh.position.set(Math.cos(angle) * 0.9, 0.4 * (i % 2 ? 1 : -1), Math.sin(angle) * 0.9);
+        group.add(cpMesh);
+        subParts.push({ mesh: cpMesh, basePos: [Math.cos(angle) * 0.9, 0.4 * (i % 2 ? 1 : -1), Math.sin(angle) * 0.9], dir: [Math.cos(angle), 0, Math.sin(angle)] });
+      }
+
+    } else if (geomType === "heart-circulation") {
+      // 3D Pulsating Human Heart Mesh + Aorta Tubes
+      const heartGeo = new THREE.DodecahedronGeometry(1.2, 2);
+      const heartMat = new THREE.MeshStandardMaterial({
+        color: 0xd97706,
+        roughness: 0.3,
+        wireframe: isWireframe,
+      });
+      mainMesh = new THREE.Mesh(heartGeo, heartMat);
+      pulseMesh = mainMesh;
+      group.add(mainMesh);
+
+      // Aorta Tube Top
+      const aortaGeo = new THREE.TorusGeometry(0.6, 0.15, 16, 32, Math.PI);
+      const aortaMat = new THREE.MeshStandardMaterial({ color: 0xef4444, wireframe: isWireframe });
+      const aorta = new THREE.Mesh(aortaGeo, aortaMat);
+      aorta.position.set(0, 1.1, 0);
+      group.add(aorta);
+
+      // Moving Blood Particles
+      for (let i = 0; i < 6; i++) {
+        const pGeo = new THREE.SphereGeometry(0.08, 16, 16);
+        const pMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+        const pMesh = new THREE.Mesh(pGeo, pMat);
+        group.add(pMesh);
+        extraObjects.push({ mesh: pMesh, radius: 0.8, speed: 2.0 + i * 0.3 });
+      }
+
+    } else if (geomType === "solenoid-magnetic") {
+      // 3D Solenoid Helical Coil + Magnetic Field Lines
+      const helixGeo = new THREE.TorusGeometry(0.8, 0.08, 16, 100);
+      const helixMat = new THREE.MeshStandardMaterial({ color: 0xb45309, metalness: 0.8, roughness: 0.2, wireframe: isWireframe });
+
+      for (let i = 0; i < 5; i++) {
+        const ring = new THREE.Mesh(helixGeo, helixMat);
+        ring.position.set(0, (i - 2) * 0.35, 0);
+        group.add(ring);
+      }
+
+      // Magnetic Field Torus Loops
+      for (let i = 0; i < 3; i++) {
+        const fieldGeo = new THREE.TorusGeometry(1.4 + i * 0.4, 0.02, 16, 100);
+        const fieldMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: isWireframe });
+        const fieldLine = new THREE.Mesh(fieldGeo, fieldMat);
+        fieldLine.rotation.x = Math.PI / 2;
+        group.add(fieldLine);
+        subParts.push({ mesh: fieldLine, basePos: [0, 0, 0], dir: [0.5 * (i + 1), 0, 0] });
+      }
+
+    } else if (geomType === "hydrocarbon") {
+      // 3D Tetrahedral Hydrocarbon Bond (CH₄)
+      const carbonGeo = new THREE.SphereGeometry(0.65, 32, 32);
+      const carbonMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.2, wireframe: isWireframe });
+      mainMesh = new THREE.Mesh(carbonGeo, carbonMat);
+      group.add(mainMesh);
+
+      // 4 Tetrahedral Bond Arms + Hydrogens
+      const hPositions = [
+        [1.1, 1.1, 1.1],
+        [-1.1, -1.1, 1.1],
+        [-1.1, 1.1, -1.1],
+        [1.1, -1.1, -1.1],
+      ];
+
+      hPositions.forEach((pos) => {
+        const bondGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.5);
+        const bondMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
+        const bond = new THREE.Mesh(bondGeo, bondMat);
+        bond.position.set(pos[0] / 2, pos[1] / 2, pos[2] / 2);
+        bond.lookAt(pos[0], pos[1], pos[2]);
+        bond.rotation.x += Math.PI / 2;
+        group.add(bond);
+
+        const hGeo = new THREE.SphereGeometry(0.3, 16, 16);
+        const hMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, wireframe: isWireframe });
+        const hMesh = new THREE.Mesh(hGeo, hMat);
+        hMesh.position.set(...pos);
+        group.add(hMesh);
+        subParts.push({ mesh: hMesh, basePos: pos, dir: [pos[0] * 0.8, pos[1] * 0.8, pos[2] * 0.8] });
+      });
+
+    } else if (geomType === "conic-sections") {
+      // 3D Double-Cone Geometry + Translucent Cutting Plane
+      const cone1Geo = new THREE.ConeGeometry(1.2, 1.5, 32);
+      const coneMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, wireframe: isWireframe, transparent: true, opacity: 0.7 });
+      const cone1 = new THREE.Mesh(cone1Geo, coneMat);
+      cone1.position.set(0, 0.75, 0);
+      group.add(cone1);
+
+      const cone2 = new THREE.Mesh(cone1Geo, coneMat);
+      cone2.rotation.z = Math.PI;
+      cone2.position.set(0, -0.75, 0);
+      group.add(cone2);
+
+      // Translucent Slicing Sheet
+      const planeGeo = new THREE.PlaneGeometry(2.5, 2.5);
+      const planeMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
+      const plane = new THREE.Mesh(planeGeo, planeMat);
+      plane.rotation.x = Math.PI / 4;
+      group.add(plane);
+      subParts.push({ mesh: plane, basePos: [0, 0, 0], dir: [0, 0.8, 0.8] });
+
+    } else if (geomType === "balance-scale") {
+      // 3D Equal-Arm Pan Balance Scale
+      const standGeo = new THREE.CylinderGeometry(0.1, 0.15, 2.2, 16);
+      const standMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
+      const stand = new THREE.Mesh(standGeo, standMat);
+      stand.position.set(0, -0.4, 0);
+      group.add(stand);
+
+      const armGeo = new THREE.BoxGeometry(2.8, 0.1, 0.1);
+      const armMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
+      const arm = new THREE.Mesh(armGeo, armMat);
+      arm.position.set(0, 0.7, 0);
+      group.add(arm);
+
+      // Left Pan
+      const panGeo = new THREE.CylinderGeometry(0.6, 0.05, 0.3, 16);
+      const panMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8 });
+      const leftPan = new THREE.Mesh(panGeo, panMat);
+      leftPan.position.set(-1.3, 0.1, 0);
+      group.add(leftPan);
+      subParts.push({ mesh: leftPan, basePos: [-1.3, 0.1, 0], dir: [-0.6, -0.4, 0] });
+
+      // Right Pan
+      const rightPan = new THREE.Mesh(panGeo, panMat);
+      rightPan.position.set(1.3, 0.1, 0);
+      group.add(rightPan);
+      subParts.push({ mesh: rightPan, basePos: [1.3, 0.1, 0], dir: [0.6, -0.4, 0] });
+
+    } else if (geomType === "box" || geomType === "cylinder" || geomType === "octahedron") {
       let geometry;
       if (geomType === "box") geometry = new THREE.BoxGeometry(1.6, 1.6, 1.6);
       else if (geomType === "cylinder") geometry = new THREE.CylinderGeometry(0.9, 0.9, 1.8, 32);
@@ -114,34 +357,7 @@ export default function ARSceneCanvas({
       wireframeLines.scale.set(1.04, 1.04, 1.04);
       group.add(wireframeLines);
 
-      // Exploded Net Plates (Top, Bottom, Sides)
-      const faceGeo = new THREE.PlaneGeometry(1.5, 1.5);
-      const faceMat = new THREE.MeshStandardMaterial({
-        color: config.secondaryColor,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.8,
-        wireframe: isWireframe,
-      });
-
-      const directions = [
-        { pos: [0, 0.85, 0], rot: [-Math.PI / 2, 0, 0], dir: [0, 1, 0] },
-        { pos: [0, -0.85, 0], rot: [Math.PI / 2, 0, 0], dir: [0, -1, 0] },
-        { pos: [0, 0, 0.85], rot: [0, 0, 0], dir: [0, 0, 1] },
-        { pos: [0, 0, -0.85], rot: [0, Math.PI, 0], dir: [0, 0, -1] },
-        { pos: [0.85, 0, 0], rot: [0, Math.PI / 2, 0], dir: [1, 0, 0] },
-        { pos: [-0.85, 0, 0], rot: [0, -Math.PI / 2, 0], dir: [-1, 0, 0] },
-      ];
-
-      directions.forEach((d) => {
-        const plate = new THREE.Mesh(faceGeo, faceMat);
-        plate.position.set(...d.pos);
-        plate.rotation.set(...d.rot);
-        group.add(plate);
-        subParts.push({ mesh: plate, basePos: d.pos, dir: d.dir });
-      });
     } else if (geomType === "solar-system") {
-      // Solar System Planet + Ring + Moon
       const planetGeo = new THREE.SphereGeometry(1.2, 32, 32);
       const planetMat = new THREE.MeshStandardMaterial({
         color: config.primaryColor,
@@ -171,8 +387,8 @@ export default function ARSceneCanvas({
       group.add(moonMesh);
       extraObjects.push({ mesh: moonMesh, radius: 2.2, speed: 1.2 });
       subParts.push({ mesh: moonMesh, basePos: [2.2, 0, 0], dir: [1, 0.5, 0] });
+
     } else if (geomType === "atomic") {
-      // Bohr Atomic Model Nucleus + Electrons
       const nucleusGeo = new THREE.SphereGeometry(0.7, 32, 32);
       const nucleusMat = new THREE.MeshStandardMaterial({
         color: config.primaryColor,
@@ -199,7 +415,6 @@ export default function ARSceneCanvas({
         extraObjects.push({ mesh: electronMesh, radius: 1.6 + i * 0.4, speed: 1.5 + i * 0.5 });
       }
     } else {
-      // Default Icosahedron Mesh
       const geometry = new THREE.IcosahedronGeometry(1.3, 1);
       const material = new THREE.MeshStandardMaterial({
         color: config.primaryColor,
@@ -260,6 +475,12 @@ export default function ARSceneCanvas({
 
       if (!isAnimPaused) {
         accumulatedTime += delta * animSpeed;
+      }
+
+      // Smooth Heartbeat Pulsing animation if active
+      if (pulseMesh && !isAnimPaused) {
+        const pulseScale = 1 + Math.sin(accumulatedTime * 5) * 0.08;
+        pulseMesh.scale.set(pulseScale, pulseScale, pulseScale);
       }
 
       // Smooth Explode / Unfold Transition

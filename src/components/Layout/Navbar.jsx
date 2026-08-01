@@ -17,10 +17,12 @@ import HomeIcon from "@mui/icons-material/Home";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import QuizIcon from "@mui/icons-material/Quiz";
+import GroupsIcon from "@mui/icons-material/Groups";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useApp } from "../../context/AppContext";
 import AnalyticsModal from "../dashboard/AnalyticsModal";
+import ClassroomSessionModal from "../../modules/Classroom/ClassroomSessionModal";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -35,6 +37,7 @@ export default function Navbar() {
   } = useApp();
 
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
+  const [showClassroomModal, setShowClassroomModal] = useState(false);
 
   const handleReset = () => {
     resetSelection();
@@ -109,8 +112,28 @@ export default function Navbar() {
             )}
           </Stack>
 
-          {/* Right Actions: Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
+          {/* Right Actions: Classroom Live Session + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
           <Stack direction="row" spacing={1.2} alignItems="center">
+            <Tooltip title="Host or Join Live AR Classroom Session">
+              <Chip
+                icon={<GroupsIcon style={{ color: "#0284C7" }} fontSize="small" />}
+                label="Live AR Room"
+                size="small"
+                onClick={() => setShowClassroomModal(true)}
+                sx={{
+                  backgroundColor: "rgba(2, 132, 199, 0.15)",
+                  color: "#0369A1",
+                  border: "1px solid rgba(2, 132, 199, 0.4)",
+                  fontWeight: 700,
+                  px: 0.5,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(2, 132, 199, 0.25)",
+                  },
+                }}
+              />
+            </Tooltip>
+
             <Tooltip title="Open NCERT Practice Quiz Hub">
               <Chip
                 icon={<QuizIcon style={{ color: "#D97706" }} fontSize="small" />}
@@ -183,6 +206,12 @@ export default function Navbar() {
       <AnalyticsModal
         open={showAnalyticsModal}
         onClose={() => setShowAnalyticsModal(false)}
+      />
+
+      {/* Multi-User AR Smart Classroom Suite Modal */}
+      <ClassroomSessionModal
+        open={showClassroomModal}
+        onClose={() => setShowClassroomModal(false)}
       />
     </>
   );

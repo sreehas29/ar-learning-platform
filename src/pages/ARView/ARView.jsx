@@ -29,8 +29,10 @@ import ARSceneCanvas from "../../modules/Scene/ARSceneCanvas";
 import ARHUDOverlay from "../../modules/Overlays/ARHUDOverlay";
 import ARToolbar from "../../modules/Overlays/ARToolbar";
 import MarkerTracker from "../../modules/Tracking/MarkerTracker";
+import SimulationControls from "../../modules/Overlays/SimulationControls";
 import { exportCanvasSnapshot } from "../../services/arService";
 import { playSnapshotSound } from "../../services/audioService";
+import { getModelConfigForActivity } from "../../registry/modelRegistry";
 
 export default function ARView() {
   const navigate = useNavigate();
@@ -51,6 +53,20 @@ export default function ARView() {
   const [isExploded, setIsExploded] = useState(false);
   const [showDimensions, setShowDimensions] = useState(false);
 
+  // Live STEM Simulation Parameters
+  const [simParams, setSimParams] = useState({
+    atomicNumber: 6,
+    refractiveIndex: 1.5,
+    laserAngle: 45,
+    legA: 3,
+    legB: 4,
+    orbitSpeed: 1.0,
+  });
+
+  const handleParamChange = (key, value) => {
+    setSimParams((prev) => ({ ...prev, [key]: value }));
+  };
+
   const handleExit = () => {
     navigate("/instructions");
   };
@@ -69,6 +85,14 @@ export default function ARView() {
     setAnimSpeed(1.0);
     setIsExploded(false);
     setShowDimensions(false);
+    setSimParams({
+      atomicNumber: 6,
+      refractiveIndex: 1.5,
+      laserAngle: 45,
+      legA: 3,
+      legB: 4,
+      orbitSpeed: 1.0,
+    });
   };
 
   const handleToggleTrackingMode = () => {
@@ -81,6 +105,8 @@ export default function ARView() {
     setSnapshotTaken(true);
     setTimeout(() => setSnapshotTaken(false), 3000);
   };
+
+  const modelConfig = getModelConfigForActivity(selectedActivity?.id);
 
   return (
     <Box
@@ -115,6 +141,7 @@ export default function ARView() {
         animSpeed={animSpeed}
         isExploded={isExploded}
         showDimensions={showDimensions}
+        simParams={simParams}
       />
 
       {/* 3. Optical Marker Tracking System Overlay */}
@@ -126,7 +153,15 @@ export default function ARView() {
       {/* 4. Educational AR Analytics & Quiz Overlay */}
       <ARHUDOverlay activity={selectedActivity} />
 
-      {/* 5. 3D WebAR Interactive Toolbar */}
+      {/* 5. Live STEM Simulation Controls & Sliders Overlay */}
+      <SimulationControls
+        activityId={selectedActivity?.id}
+        geometryType={modelConfig?.geometryType}
+        simParams={simParams}
+        onParamChange={handleParamChange}
+      />
+
+      {/* 6. 3D WebAR Interactive Toolbar */}
       <ARToolbar
         isWireframe={isWireframe}
         onToggleWireframe={() => setIsWireframe(!isWireframe)}
@@ -144,7 +179,7 @@ export default function ARView() {
         onToggleDimensions={() => setShowDimensions(!showDimensions)}
       />
 
-      {/* 6. Top Navigation Header Bar */}
+      {/* 7. Top Navigation Header Bar */}
       <Box
         sx={{
           p: 2,
@@ -158,149 +193,113 @@ export default function ARView() {
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <IconButton color="inherit" onClick={handleExit} size="large">
-            <CloseIcon />
-          </IconButton>
+          <Chip
+            icon={<GridViewIcon fontSize="small" style={{ color: "#38BDF8" }} />}
+            label={selectedActivity ? selectedActivity.title : "3D WebAR Interactive Mode"}
+            color="primary"
+            variant="outlined"
+            sx={{ fontWeight: 700, fontSize: "0.9rem", color: "#FFFFFF" }}
+          />
 
-          <Box>
-            <Typography variant="h6" fontWeight={700} sx={{ color: "#38BDF8" }}>
-              {selectedActivity?.title || "WebAR 3D Interactive Scene"}
-            </Typography>
-            <Typography variant="caption" sx={{ color: "rgba(255, 255, 255, 0.7)" }}>
-              {selectedSubject ? selectedSubject.toUpperCase() : "MATHEMATICS"} • Grade{" "}
-              {selectedGrade || "6"}
-            </Typography>
-          </Box>
+          {selectedGrade && (
+            <Chip
+              label={`Grade ${selectedGrade}`}
+              size="small"
+              sx={{ backgroundColor: "rgba(255, 255, 255, 0.15)", color: "#FFFFFF", fontWeight: 600 }}
+            />
+          )}
+
+          {snapshotTaken && (
+            <Chip
+              icon={<CheckCircleOutlinedIcon style={{ color: "#4ADE80" }} />}
+              label="HD Snapshot Saved!"
+              color="success"
+              size="small"
+              sx={{ fontWeight: 700 }}
+            />
+          )}
         </Stack>
 
-        <Stack direction="row" spacing={1} alignItems="center">
-          <Chip
-            icon={<CheckCircleOutlinedIcon style={{ color: "#4ADE80" }} />}
-            label="Three.js WebGL Active"
-            size="small"
-            sx={{
-              backgroundColor: "rgba(74, 222, 128, 0.15)",
-              color: "#4ADE80",
-              border: "1px solid rgba(74, 222, 128, 0.3)",
-              fontWeight: 600,
-            }}
-          />
+        <Stack direction="row" spacing={1}>
+          <Tooltip title={isCameraEnabled ? "Switch to 3D Grid Canvas" : "Enable Live Camera Passthrough"}>
+            <Button
+              size="small"
+              variant={isCameraEnabled ? "contained" : "outlined"}
+              color={isCameraEnabled ? "primary" : "inherit"}
+              startIcon={isCameraEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
+              onClick={() => setIsCameraEnabled(!isCameraEnabled)}
+              sx={{ borderRadius: 2.5, textTransform: "none", fontWeight: 600 }}
+            >
+              {isCameraEnabled ? "Camera Active" : "3D Studio Grid"}
+            </Button>
+          </Tooltip>
+
+          <Tooltip title="Take HD Canvas Snapshot">
+            <IconButton color="primary" onClick={handleSnapshot} sx={{ backgroundColor: "rgba(56, 189, 248, 0.15)" }}>
+              <CameraAltIcon />
+            </IconButton>
+          </Tooltip>
+
           <Button
             variant="outlined"
+            color="error"
             size="small"
+            startIcon={<CloseIcon />}
             onClick={handleExit}
-            sx={{
-              color: "#FFFFFF",
-              borderColor: "rgba(255, 255, 255, 0.3)",
-              textTransform: "none",
-            }}
+            sx={{ borderRadius: 2.5, textTransform: "none", fontWeight: 700 }}
           >
             Exit AR
           </Button>
         </Stack>
       </Box>
 
-      {/* Snapshot Download Alert */}
-      {snapshotTaken && (
-        <Alert
-          severity="success"
-          sx={{
-            position: "absolute",
-            top: 80,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 20,
-            backgroundColor: "rgba(34, 197, 94, 0.95)",
-            color: "#FFFFFF",
-          }}
-        >
-          AR 3D Lesson Snapshot Downloaded!
-        </Alert>
-      )}
-
-      {/* 7. Bottom Quick Action Controls Bar */}
-      <Box
+      {/* 8. Bottom floating 3D Quick Controls */}
+      <Paper
+        elevation={8}
         sx={{
-          p: 1.5,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          background: "rgba(15, 23, 42, 0.85)",
+          position: "absolute",
+          bottom: 20,
+          right: 20,
+          zIndex: 10,
+          p: 1,
+          borderRadius: 3,
+          backgroundColor: "rgba(15, 23, 42, 0.75)",
           backdropFilter: "blur(12px)",
-          borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-          zIndex: 9,
+          border: "1px solid rgba(255, 255, 255, 0.1)",
         }}
       >
-        <Paper
-          elevation={0}
-          sx={{
-            px: 2.5,
-            py: 0.5,
-            borderRadius: 5,
-            backgroundColor: "rgba(30, 41, 59, 0.85)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-            display: "flex",
-            gap: 1.5,
-            alignItems: "center",
-          }}
-        >
-          <Tooltip title="Rotate 3D Mesh Left">
-            <IconButton color="info" onClick={handleRotateLeft} size="small">
+        <Stack direction="row" spacing={1}>
+          <Tooltip title="Rotate 3D Model Left">
+            <IconButton color="primary" size="small" onClick={handleRotateLeft}>
               <RotateLeftIcon />
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Rotate 3D Mesh Right">
-            <IconButton color="info" onClick={handleRotateRight} size="small">
+          <Tooltip title="Rotate 3D Model Right">
+            <IconButton color="primary" size="small" onClick={handleRotateRight}>
               <RotateRightIcon />
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Zoom In Mesh">
-            <IconButton color="info" onClick={handleZoomIn} size="small">
+          <Tooltip title="Zoom In 3D Model">
+            <IconButton color="primary" size="small" onClick={handleZoomIn}>
               <ZoomInIcon />
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Zoom Out Mesh">
-            <IconButton color="info" onClick={handleZoomOut} size="small">
+          <Tooltip title="Zoom Out 3D Model">
+            <IconButton color="primary" size="small" onClick={handleZoomOut}>
               <ZoomOutIcon />
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Toggle Wireframe View Mode">
-            <IconButton
-              color={isWireframe ? "warning" : "default"}
-              onClick={() => setIsWireframe(!isWireframe)}
-              size="small"
-            >
-              <GridViewIcon />
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title={isCameraEnabled ? "Switch to AR Studio Mode" : "Enable Live Camera Feed"}>
-            <IconButton
-              color={isCameraEnabled ? "success" : "default"}
-              onClick={() => setIsCameraEnabled(!isCameraEnabled)}
-              size="small"
-            >
-              {isCameraEnabled ? <VideocamIcon /> : <VideocamOffIcon />}
-            </IconButton>
-          </Tooltip>
-
-          <Tooltip title="Reset Transformations">
-            <IconButton color="secondary" onClick={handleReset} size="small">
+          <Tooltip title="Reset 3D Model Position & Scale">
+            <IconButton color="secondary" size="small" onClick={handleReset}>
               <RestartAltIcon />
             </IconButton>
           </Tooltip>
-
-          <Tooltip title="Capture AR Lesson Snapshot">
-            <IconButton color="success" onClick={handleSnapshot} size="small">
-              <CameraAltIcon />
-            </IconButton>
-          </Tooltip>
-        </Paper>
-      </Box>
+        </Stack>
+      </Paper>
     </Box>
   );
 }

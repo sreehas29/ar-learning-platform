@@ -14,6 +14,7 @@ export default function ARSceneCanvas({
   animSpeed = 1.0,
   isExploded = false,
   showDimensions = false,
+  simParams = {},
 }) {
   const mountRef = useRef(null);
 
@@ -58,83 +59,82 @@ export default function ARSceneCanvas({
       pointLight = new THREE.PointLight(0x38bdf8, 2.0, 12);
       pointLight.position.set(-8, -5, -4);
     } else if (lightingPreset === "sunlight") {
-      ambientLight = new THREE.AmbientLight(0xfff7ed, 0.9);
-      dirLight = new THREE.DirectionalLight(0xfacc15, 2.0);
-      dirLight.position.set(8, 12, 5);
-      pointLight = new THREE.PointLight(0xf97316, 1.5, 10);
-      pointLight.position.set(-5, -5, 2);
+      ambientLight = new THREE.AmbientLight(0xffedd5, 0.9);
+      dirLight = new THREE.DirectionalLight(0xf97316, 2.8);
+      dirLight.position.set(15, 20, 5);
+      pointLight = new THREE.PointLight(0xeab308, 1.5, 15);
+      pointLight.position.set(5, 10, 5);
     } else if (lightingPreset === "cyber") {
       ambientLight = new THREE.AmbientLight(0x0f172a, 0.5);
-      dirLight = new THREE.DirectionalLight(0xa855f7, 2.2);
-      dirLight.position.set(-5, 10, 5);
-      pointLight = new THREE.PointLight(0x38bdf8, 2.5, 10);
-      pointLight.position.set(5, -5, 5);
+      dirLight = new THREE.DirectionalLight(0xec4899, 3.0);
+      dirLight.position.set(-10, 10, 10);
+      pointLight = new THREE.PointLight(0x06b6d4, 3.0, 15);
+      pointLight.position.set(8, -5, 5);
     } else {
-      // Studio Default
-      ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
-      dirLight = new THREE.DirectionalLight(0x38bdf8, 1.5);
+      // Default Studio Preset
+      ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+      dirLight = new THREE.DirectionalLight(0xffffff, 1.6);
       dirLight.position.set(5, 10, 7);
-      pointLight = new THREE.PointLight(config.primaryColor, 1.2, 10);
-      pointLight.position.set(-5, -5, -2);
+      pointLight = new THREE.PointLight(0x1565c0, 1.0, 10);
+      pointLight.position.set(-5, 5, -5);
     }
 
+    dirLight.castShadow = true;
     scene.add(ambientLight);
     scene.add(dirLight);
     scene.add(pointLight);
 
-    // 5. Create Dynamic 3D Mesh & Sub-components
+    // 5. Build High-Fidelity 3D WebGL Models & Assemblies
     const group = new THREE.Group();
     scene.add(group);
 
-    let mainMesh;
-    let extraObjects = [];
-    let subParts = []; // Sub-components for exploded deconstruction
-    let pulseMesh = null; // For heartbeat animation
-
-    const geomType = config.geometryType;
+    const geomType = config.geometryType || "box";
+    let mainMesh = null;
+    let pulseMesh = null;
+    const subParts = [];
+    const extraObjects = [];
 
     if (geomType === "pythagoras") {
-      // 3D Pythagoras Triangle Base + 3 Volume Squares (a², b², c²)
+      // 3D Pythagoras Theorem Proof Geometry
+      const legAVal = simParams.legA || 3;
+      const legBVal = simParams.legB || 4;
+      const scaleA = (legAVal / 3) * 1.6;
+      const scaleB = (legBVal / 4) * 1.2;
+
       const triShape = new THREE.Shape();
       triShape.moveTo(0, 0);
-      triShape.lineTo(1.6, 0);
-      triShape.lineTo(0, 1.2);
+      triShape.lineTo(scaleA, 0);
+      triShape.lineTo(0, scaleB);
       triShape.closePath();
 
       const extrudeSettings = { depth: 0.3, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05 };
       const triGeo = new THREE.ExtrudeGeometry(triShape, extrudeSettings);
       const triMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, wireframe: isWireframe });
       mainMesh = new THREE.Mesh(triGeo, triMat);
-      mainMesh.position.set(-0.8, -0.6, 0);
+      mainMesh.position.set(-scaleA / 2, -scaleB / 2, 0);
       group.add(mainMesh);
 
       // Block A² (Base)
-      const blockAGeo = new THREE.BoxGeometry(1.6, 1.6, 0.4);
+      const blockAGeo = new THREE.BoxGeometry(scaleA, scaleA, 0.4);
       const blockAMat = new THREE.MeshStandardMaterial({ color: 0x10b981, wireframe: isWireframe });
       const blockA = new THREE.Mesh(blockAGeo, blockAMat);
-      blockA.position.set(0, -1.4, 0);
+      blockA.position.set(0, -scaleB / 2 - scaleA / 2, 0);
       group.add(blockA);
-      subParts.push({ mesh: blockA, basePos: [0, -1.4, 0], dir: [0, -1, 0] });
+      subParts.push({ mesh: blockA, basePos: [0, -scaleB / 2 - scaleA / 2, 0], dir: [0, -1, 0] });
 
       // Block B² (Vertical)
-      const blockBGeo = new THREE.BoxGeometry(1.2, 1.2, 0.4);
+      const blockBGeo = new THREE.BoxGeometry(scaleB, scaleB, 0.4);
       const blockBMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, wireframe: isWireframe });
       const blockB = new THREE.Mesh(blockBGeo, blockBMat);
-      blockB.position.set(-1.4, 0, 0);
+      blockB.position.set(-scaleA / 2 - scaleB / 2, 0, 0);
       group.add(blockB);
-      subParts.push({ mesh: blockB, basePos: [-1.4, 0, 0], dir: [-1, 0, 0] });
-
-      // Block C² (Hypotenuse)
-      const blockCGeo = new THREE.BoxGeometry(2.0, 2.0, 0.4);
-      const blockCMat = new THREE.MeshStandardMaterial({ color: 0x6366f1, wireframe: isWireframe });
-      const blockC = new THREE.Mesh(blockCGeo, blockCMat);
-      blockC.position.set(0.6, 0.8, 0);
-      blockC.rotation.z = -Math.atan(1.2 / 1.6);
-      group.add(blockC);
-      subParts.push({ mesh: blockC, basePos: [0.6, 0.8, 0], dir: [0.8, 0.8, 0] });
+      subParts.push({ mesh: blockB, basePos: [-scaleA / 2 - scaleB / 2, 0, 0], dir: [-1, 0, 0] });
 
     } else if (geomType === "prism-refraction") {
       // 3D Glass Prism Refraction + Dispersion Spectrum Rays
+      const iorVal = simParams.refractiveIndex || 1.5;
+      const angleVal = simParams.laserAngle || 45;
+
       const prismGeo = new THREE.CylinderGeometry(1.2, 1.2, 2.0, 3);
       const prismMat = new THREE.MeshPhysicalMaterial({
         color: 0x93c5fd,
@@ -142,7 +142,7 @@ export default function ARSceneCanvas({
         opacity: 1,
         transparent: true,
         roughness: 0.1,
-        ior: 1.5,
+        ior: iorVal,
         wireframe: isWireframe,
       });
       mainMesh = new THREE.Mesh(prismGeo, prismMat);
@@ -152,7 +152,7 @@ export default function ARSceneCanvas({
       const beamGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.5);
       const beamMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const beam = new THREE.Mesh(beamGeo, beamMat);
-      beam.rotation.z = Math.PI / 3;
+      beam.rotation.z = (angleVal * Math.PI) / 180;
       beam.position.set(-1.4, 0, 0);
       group.add(beam);
 
@@ -162,7 +162,7 @@ export default function ARSceneCanvas({
         const rayGeo = new THREE.CylinderGeometry(0.02, 0.02, 2.2);
         const rayMat = new THREE.MeshBasicMaterial({ color: col });
         const ray = new THREE.Mesh(rayGeo, rayMat);
-        ray.rotation.z = -Math.PI / 3.5 - idx * 0.04;
+        ray.rotation.z = -Math.PI / 3.5 - idx * 0.04 * (iorVal / 1.5);
         ray.position.set(1.4, -0.2 + idx * 0.08, 0);
         group.add(ray);
         subParts.push({ mesh: ray, basePos: [1.4, -0.2 + idx * 0.08, 0], dir: [1, idx * 0.2, 0] });
@@ -255,21 +255,19 @@ export default function ARSceneCanvas({
       }
 
     } else if (geomType === "hydrocarbon") {
-      // 3D Tetrahedral Hydrocarbon Bond (CH₄)
+      // 3D Dynamic Bohr Atom / Tetrahedral Hydrocarbon Bond
+      const atomicNum = simParams.atomicNumber || 6;
+
       const carbonGeo = new THREE.SphereGeometry(0.65, 32, 32);
       const carbonMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.2, wireframe: isWireframe });
       mainMesh = new THREE.Mesh(carbonGeo, carbonMat);
       group.add(mainMesh);
 
-      // 4 Tetrahedral Bond Arms + Hydrogens
-      const hPositions = [
-        [1.1, 1.1, 1.1],
-        [-1.1, -1.1, 1.1],
-        [-1.1, 1.1, -1.1],
-        [1.1, -1.1, -1.1],
-      ];
+      // Render Electrons / Hydrogens based on atomicNum
+      for (let i = 0; i < atomicNum; i++) {
+        const angle = (Math.PI * 2 * i) / atomicNum;
+        const pos = [Math.cos(angle) * 1.5, Math.sin(angle) * 1.5, (i % 2 ? 0.4 : -0.4)];
 
-      hPositions.forEach((pos) => {
         const bondGeo = new THREE.CylinderGeometry(0.06, 0.06, 1.5);
         const bondMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8 });
         const bond = new THREE.Mesh(bondGeo, bondMat);
@@ -284,7 +282,7 @@ export default function ARSceneCanvas({
         hMesh.position.set(...pos);
         group.add(hMesh);
         subParts.push({ mesh: hMesh, basePos: pos, dir: [pos[0] * 0.8, pos[1] * 0.8, pos[2] * 0.8] });
-      });
+      }
 
     } else if (geomType === "conic-sections") {
       // 3D Double-Cone Geometry + Translucent Cutting Plane
@@ -299,245 +297,177 @@ export default function ARSceneCanvas({
       cone2.position.set(0, -0.75, 0);
       group.add(cone2);
 
-      // Translucent Slicing Sheet
-      const planeGeo = new THREE.PlaneGeometry(2.5, 2.5);
-      const planeMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, side: THREE.DoubleSide, transparent: true, opacity: 0.75 });
+      // Cutting Plane Sheet
+      const planeGeo = new THREE.PlaneGeometry(2.4, 2.4);
+      const planeMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, side: THREE.DoubleSide, transparent: true, opacity: 0.65 });
       const plane = new THREE.Mesh(planeGeo, planeMat);
       plane.rotation.x = Math.PI / 4;
       group.add(plane);
       subParts.push({ mesh: plane, basePos: [0, 0, 0], dir: [0, 0.8, 0.8] });
 
     } else if (geomType === "balance-scale") {
-      // 3D Equal-Arm Pan Balance Scale
-      const standGeo = new THREE.CylinderGeometry(0.1, 0.15, 2.2, 16);
-      const standMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8 });
-      const stand = new THREE.Mesh(standGeo, standMat);
-      stand.position.set(0, -0.4, 0);
-      group.add(stand);
+      // 3D Mechanical Balance Scale Assembly
+      const pillarGeo = new THREE.CylinderGeometry(0.12, 0.25, 2.4);
+      const metalMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.8, roughness: 0.2, wireframe: isWireframe });
+      mainMesh = new THREE.Mesh(pillarGeo, metalMat);
+      mainMesh.position.set(0, -0.2, 0);
+      group.add(mainMesh);
 
+      // Tilting Arm
       const armGeo = new THREE.BoxGeometry(2.8, 0.1, 0.1);
-      const armMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
-      const arm = new THREE.Mesh(armGeo, armMat);
-      arm.position.set(0, 0.7, 0);
+      const arm = new THREE.Mesh(armGeo, metalMat);
+      arm.position.set(0, 0.9, 0);
       group.add(arm);
 
-      // Left Pan
-      const panGeo = new THREE.CylinderGeometry(0.6, 0.05, 0.3, 16);
-      const panMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8 });
-      const leftPan = new THREE.Mesh(panGeo, panMat);
-      leftPan.position.set(-1.3, 0.1, 0);
-      group.add(leftPan);
-      subParts.push({ mesh: leftPan, basePos: [-1.3, 0.1, 0], dir: [-0.6, -0.4, 0] });
+      // Suspended Pans
+      [-1.3, 1.3].forEach((xPos, idx) => {
+        const panGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.05, 32);
+        const panMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, wireframe: isWireframe });
+        const pan = new THREE.Mesh(panGeo, panMat);
+        pan.position.set(xPos, 0.2, 0);
+        group.add(pan);
+        subParts.push({ mesh: pan, basePos: [xPos, 0.2, 0], dir: [0, -0.6 * (idx ? 1 : -1), 0] });
+      });
 
-      // Right Pan
-      const rightPan = new THREE.Mesh(panGeo, panMat);
-      rightPan.position.set(1.3, 0.1, 0);
-      group.add(rightPan);
-      subParts.push({ mesh: rightPan, basePos: [1.3, 0.1, 0], dir: [0.6, -0.4, 0] });
-
-    } else if (geomType === "box" || geomType === "cylinder" || geomType === "octahedron") {
+    } else {
+      // Standard Geometric Mesh Generator
       let geometry;
-      if (geomType === "box") geometry = new THREE.BoxGeometry(1.6, 1.6, 1.6);
-      else if (geomType === "cylinder") geometry = new THREE.CylinderGeometry(0.9, 0.9, 1.8, 32);
-      else geometry = new THREE.OctahedronGeometry(1.4);
+      if (geomType === "cylinder") {
+        geometry = new THREE.CylinderGeometry(1.2, 1.2, 2.2, 32);
+      } else if (geomType === "cone") {
+        geometry = new THREE.ConeGeometry(1.4, 2.4, 32);
+      } else if (geomType === "sphere") {
+        geometry = new THREE.SphereGeometry(1.4, 32, 32);
+      } else if (geomType === "torus") {
+        geometry = new THREE.TorusGeometry(1.2, 0.45, 16, 100);
+      } else {
+        geometry = new THREE.BoxGeometry(1.8, 1.8, 1.8);
+      }
 
       const material = new THREE.MeshStandardMaterial({
-        color: config.primaryColor,
+        color: config.color || 0x1565c0,
         roughness: 0.3,
         metalness: 0.2,
         wireframe: isWireframe,
       });
+
       mainMesh = new THREE.Mesh(geometry, material);
-      group.add(mainMesh);
-
-      // Outer Wireframe Frame
-      const wireGeo = new THREE.WireframeGeometry(geometry);
-      const wireMat = new THREE.LineBasicMaterial({ color: config.secondaryColor, linewidth: 2 });
-      const wireframeLines = new THREE.LineSegments(wireGeo, wireMat);
-      wireframeLines.scale.set(1.04, 1.04, 1.04);
-      group.add(wireframeLines);
-
-    } else if (geomType === "solar-system") {
-      const planetGeo = new THREE.SphereGeometry(1.2, 32, 32);
-      const planetMat = new THREE.MeshStandardMaterial({
-        color: config.primaryColor,
-        roughness: 0.4,
-        wireframe: isWireframe,
-      });
-      mainMesh = new THREE.Mesh(planetGeo, planetMat);
-      group.add(mainMesh);
-
-      const ringGeo = new THREE.RingGeometry(1.5, 2.2, 32);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: config.secondaryColor,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.7,
-        wireframe: isWireframe,
-      });
-      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-      ringMesh.rotation.x = Math.PI / 2.5;
-      group.add(ringMesh);
-      subParts.push({ mesh: ringMesh, basePos: [0, 0, 0], dir: [0, 0.8, 0.5] });
-
-      const moonGeo = new THREE.SphereGeometry(0.3, 16, 16);
-      const moonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, wireframe: isWireframe });
-      const moonMesh = new THREE.Mesh(moonGeo, moonMat);
-      moonMesh.position.set(2.2, 0, 0);
-      group.add(moonMesh);
-      extraObjects.push({ mesh: moonMesh, radius: 2.2, speed: 1.2 });
-      subParts.push({ mesh: moonMesh, basePos: [2.2, 0, 0], dir: [1, 0.5, 0] });
-
-    } else if (geomType === "atomic") {
-      const nucleusGeo = new THREE.SphereGeometry(0.7, 32, 32);
-      const nucleusMat = new THREE.MeshStandardMaterial({
-        color: config.primaryColor,
-        roughness: 0.2,
-        wireframe: isWireframe,
-      });
-      mainMesh = new THREE.Mesh(nucleusGeo, nucleusMat);
-      group.add(mainMesh);
-
-      for (let i = 0; i < 3; i++) {
-        const ringGeo = new THREE.TorusGeometry(1.6 + i * 0.4, 0.02, 16, 100);
-        const ringMat = new THREE.MeshBasicMaterial({ color: config.secondaryColor, wireframe: isWireframe });
-        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-        ringMesh.rotation.x = (Math.PI / 3) * i;
-        ringMesh.rotation.y = (Math.PI / 4) * i;
-        group.add(ringMesh);
-        subParts.push({ mesh: ringMesh, basePos: [0, 0, 0], dir: [0, 0.5 * (i + 1), 0.5 * (i + 1)] });
-
-        const electronGeo = new THREE.SphereGeometry(0.12, 16, 16);
-        const electronMat = new THREE.MeshBasicMaterial({ color: config.wireframeColor, wireframe: isWireframe });
-        const electronMesh = new THREE.Mesh(electronGeo, electronMat);
-        electronMesh.position.set(1.6 + i * 0.4, 0, 0);
-        group.add(electronMesh);
-        extraObjects.push({ mesh: electronMesh, radius: 1.6 + i * 0.4, speed: 1.5 + i * 0.5 });
-      }
-    } else {
-      const geometry = new THREE.IcosahedronGeometry(1.3, 1);
-      const material = new THREE.MeshStandardMaterial({
-        color: config.primaryColor,
-        roughness: 0.3,
-        wireframe: isWireframe,
-      });
-      mainMesh = new THREE.Mesh(geometry, material);
+      mainMesh.castShadow = true;
+      mainMesh.receiveShadow = true;
       group.add(mainMesh);
     }
 
-    // 6. 3D Bounding Box Dimension Rulers
+    // 6. Real-Time 3D Dimension Bounding Box Helper
     let boxHelper = null;
-    if (showDimensions && mainMesh) {
-      boxHelper = new THREE.BoxHelper(mainMesh, 0x10b981);
+    if (showDimensions && group) {
+      boxHelper = new THREE.BoxHelper(group, 0x38bdf8);
       scene.add(boxHelper);
     }
 
-    // 7. Interactive Pointer Drag & Orbit State
+    // Apply Global Scale Factor
+    group.scale.set(scaleFactor, scaleFactor, scaleFactor);
+
+    // 7. Interactive Pointer Drag & Orbit Gestures
     let isDragging = false;
-    let prevPointer = { x: 0, y: 0 };
-    let gestureRotation = { x: 0, y: 0 };
+    let previousPointerPos = { x: 0, y: 0 };
 
     const handlePointerDown = (e) => {
       isDragging = true;
-      prevPointer = { x: e.clientX, y: e.clientY };
+      previousPointerPos = { x: e.clientX, y: e.clientY };
     };
 
     const handlePointerMove = (e) => {
       if (!isDragging) return;
-      const deltaX = e.clientX - prevPointer.x;
-      const deltaY = e.clientY - prevPointer.y;
+      const deltaX = e.clientX - previousPointerPos.x;
+      const deltaY = e.clientY - previousPointerPos.y;
 
-      gestureRotation.y += deltaX * 0.008;
-      gestureRotation.x += deltaY * 0.008;
+      group.rotation.y += deltaX * 0.01;
+      group.rotation.x += deltaY * 0.01;
 
-      prevPointer = { x: e.clientX, y: e.clientY };
+      previousPointerPos = { x: e.clientX, y: e.clientY };
     };
 
     const handlePointerUp = () => {
       isDragging = false;
     };
 
-    const domElement = renderer.domElement;
-    domElement.style.pointerEvents = "auto";
-    domElement.addEventListener("pointerdown", handlePointerDown);
+    const domElem = renderer.domElement;
+    domElem.addEventListener("pointerdown", handlePointerDown);
     window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("pointerup", handlePointerUp);
 
-    // 8. Animation Frame Loop
+    // 8. Three.js Animation Render Loop
     let animationFrameId;
-    let clock = new THREE.Clock();
     let accumulatedTime = 0;
-    let explodeProgress = 0;
+    const speedMult = simParams.orbitSpeed || 1.0;
 
-    function animate() {
+    const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
 
       if (!isAnimPaused) {
-        accumulatedTime += delta * animSpeed;
-      }
+        accumulatedTime += 0.015 * animSpeed * speedMult;
 
-      // Smooth Heartbeat Pulsing animation if active
-      if (pulseMesh && !isAnimPaused) {
-        const pulseScale = 1 + Math.sin(accumulatedTime * 5) * 0.08;
-        pulseMesh.scale.set(pulseScale, pulseScale, pulseScale);
-      }
-
-      // Smooth Explode / Unfold Transition
-      const targetExplode = isExploded ? 1 : 0;
-      explodeProgress += (targetExplode - explodeProgress) * 0.08;
-
-      subParts.forEach((part) => {
-        const offset = 0.8 * explodeProgress;
-        part.mesh.position.x = part.basePos[0] + part.dir[0] * offset;
-        part.mesh.position.y = part.basePos[1] + part.dir[1] * offset;
-        part.mesh.position.z = part.basePos[2] + part.dir[2] * offset;
-      });
-
-      // Combine Auto-Rotation + Manual Rotation + Direct Pointer Gesture
-      group.rotation.y = accumulatedTime * config.autoRotateSpeed + (manualRotation * Math.PI) / 180 + gestureRotation.y;
-      group.rotation.x = Math.sin(accumulatedTime * 0.3) * 0.2 + gestureRotation.x;
-
-      const combinedScale = config.initialScale * scaleFactor;
-      group.scale.set(combinedScale, combinedScale, combinedScale);
-
-      extraObjects.forEach((obj) => {
-        if (obj.radius) {
-          const angle = accumulatedTime * obj.speed;
-          obj.mesh.position.x = Math.cos(angle) * obj.radius;
-          obj.mesh.position.z = Math.sin(angle) * obj.radius;
+        // Auto-rotation when not dragging
+        if (!isDragging) {
+          group.rotation.y += 0.005 * animSpeed * speedMult;
         }
-      });
+
+        // Heartbeat pulsation
+        if (pulseMesh) {
+          const s = 1.0 + Math.sin(accumulatedTime * 5) * 0.08;
+          pulseMesh.scale.set(s, s, s);
+        }
+
+        // Moving blood particles / orbits
+        extraObjects.forEach((item) => {
+          const t = accumulatedTime * item.speed;
+          item.mesh.position.set(Math.cos(t) * item.radius, Math.sin(t) * item.radius, Math.sin(t * 2) * 0.3);
+        });
+
+        // Exploded View / Polyhedra Deconstruction Animation
+        subParts.forEach((part) => {
+          const targetOffset = isExploded ? 0.8 : 0;
+          part.mesh.position.x = THREE.MathUtils.lerp(part.mesh.position.x, part.basePos[0] + part.dir[0] * targetOffset, 0.08);
+          part.mesh.position.y = THREE.MathUtils.lerp(part.mesh.position.y, part.basePos[1] + part.dir[1] * targetOffset, 0.08);
+          part.mesh.position.z = THREE.MathUtils.lerp(part.mesh.position.z, part.basePos[2] + part.dir[2] * targetOffset, 0.08);
+        });
+      }
+
+      // Manual rotation prop override
+      if (manualRotation) {
+        group.rotation.y = manualRotation;
+      }
 
       if (boxHelper) {
         boxHelper.update();
       }
 
       renderer.render(scene, camera);
-    }
+    };
 
     animate();
 
-    // 9. Resize Handler
-    function handleResize() {
+    // Resize Handler
+    const handleResize = () => {
       if (!container) return;
-      const w = container.clientWidth;
-      const h = container.clientHeight;
+      const w = container.clientWidth || window.innerWidth;
+      const h = container.clientHeight || window.innerHeight;
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-    }
+    };
 
     window.addEventListener("resize", handleResize);
 
+    // Cleanup
     return () => {
-      cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
-      domElement.removeEventListener("pointerdown", handlePointerDown);
+      domElem.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
+      cancelAnimationFrame(animationFrameId);
 
-      if (container.contains(renderer.domElement)) {
+      if (container && renderer.domElement) {
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
@@ -553,6 +483,7 @@ export default function ARSceneCanvas({
     animSpeed,
     isExploded,
     showDimensions,
+    simParams,
   ]);
 
   return (
@@ -564,8 +495,8 @@ export default function ARSceneCanvas({
         position: "absolute",
         top: 0,
         left: 0,
-        zIndex: 1,
-        pointerEvents: "auto",
+        zIndex: 10,
+        touchAction: "none",
       }}
     />
   );

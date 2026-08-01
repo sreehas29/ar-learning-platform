@@ -8,7 +8,6 @@ import {
   Chip,
   Alert,
   Divider,
-  Stack,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CalculateIcon from "@mui/icons-material/Calculate";
@@ -64,7 +63,7 @@ export default function Dashboard() {
   const currentSubject = selectedSubject ? subjectMeta[selectedSubject] : null;
 
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#F8FAFC" }}>
+    <Box sx={{ minHeight: "100vh", backgroundColor: "#0F172A", color: "#FFFFFF" }}>
       <Navbar />
 
       <Box
@@ -73,20 +72,21 @@ export default function Dashboard() {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          background: "radial-gradient(circle at 50% 0%, #E3F2FD 0%, #F8FAFC 70%)",
+          background: "radial-gradient(circle at 50% 0%, #1E293B 0%, #0F172A 80%)",
           p: { xs: 2, md: 4 },
         }}
       >
         <Paper
-          elevation={8}
+          elevation={12}
           sx={{
             width: "100%",
             maxWidth: 1050,
             p: { xs: 3, sm: 5, md: 6 },
             borderRadius: 6,
-            backgroundColor: "#FFFFFF",
-            boxShadow: "0 20px 50px rgba(15, 23, 42, 0.08)",
-            border: "1px solid rgba(226, 232, 240, 0.8)",
+            backgroundColor: "rgba(30, 41, 59, 0.85)",
+            backdropFilter: "blur(20px)",
+            boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
           }}
         >
           {/* Navigation / Header Bar */}
@@ -101,7 +101,7 @@ export default function Dashboard() {
             <Button
               startIcon={<ArrowBackIcon />}
               onClick={handleBackToHome}
-              sx={{ color: "text.secondary", textTransform: "none", fontWeight: 600 }}
+              sx={{ color: "rgba(255, 255, 255, 0.7)", textTransform: "none", fontWeight: 600 }}
             >
               Change Subject
             </Button>
@@ -112,7 +112,7 @@ export default function Dashboard() {
                 label={`Active Subject: ${currentSubject.name}`}
                 color={currentSubject.color}
                 variant="outlined"
-                sx={{ fontWeight: 700, fontSize: "0.95rem", py: 2, px: 1 }}
+                sx={{ fontWeight: 700, fontSize: "0.95rem", py: 2, px: 1, color: "#FFFFFF" }}
               />
             ) : (
               <Chip
@@ -125,16 +125,22 @@ export default function Dashboard() {
             )}
           </Box>
 
-          <Divider sx={{ mb: 4 }} />
+          <Divider sx={{ mb: 4, borderColor: "rgba(255, 255, 255, 0.1)" }} />
 
           {/* Title Section */}
           <Box textAlign="center" mb={4}>
             <Chip
-              icon={<VerifiedIcon style={{ color: "#1565C0" }} />}
+              icon={<VerifiedIcon style={{ color: "#38BDF8" }} />}
               label="Grade-Specific Curriculum Customization"
-              color="primary"
               variant="outlined"
-              sx={{ fontWeight: 700, mb: 1.5, fontSize: "0.8rem" }}
+              sx={{
+                fontWeight: 800,
+                mb: 1.5,
+                fontSize: "0.85rem",
+                color: "#38BDF8",
+                borderColor: "rgba(56, 189, 248, 0.4)",
+                backgroundColor: "rgba(56, 189, 248, 0.1)",
+              }}
             />
 
             <Typography
@@ -143,8 +149,8 @@ export default function Dashboard() {
               gutterBottom
               sx={{
                 fontWeight: 900,
-                fontSize: { xs: "2rem", sm: "2.5rem" },
-                background: "linear-gradient(135deg, #0F172A 0%, #1565C0 100%)",
+                fontSize: { xs: "2.2rem", sm: "2.8rem" },
+                background: "linear-gradient(135deg, #FFFFFF 0%, #38BDF8 60%, #818CF8 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -152,18 +158,22 @@ export default function Dashboard() {
               Teacher Dashboard
             </Typography>
 
-            <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 650, mx: "auto" }}>
+            <Typography variant="body1" color="rgba(255, 255, 255, 0.8)" sx={{ maxWidth: 650, mx: "auto" }}>
               Select a target grade level (Grades 6–10) to customize AR curriculum activities and NCERT kits.
             </Typography>
           </Box>
 
           {/* Missing Subject Guard */}
           {!selectedSubject && (
-            <Alert severity="warning" sx={{ mb: 4 }} action={
-              <Button color="inherit" size="small" onClick={handleBackToHome}>
-                Select Subject
-              </Button>
-            }>
+            <Alert
+              severity="warning"
+              sx={{ mb: 4, borderRadius: 3 }}
+              action={
+                <Button color="inherit" size="small" onClick={handleBackToHome}>
+                  Select Subject
+                </Button>
+              }
+            >
               Please select a subject first on the Home page to proceed with grade selection.
             </Alert>
           )}
@@ -190,10 +200,11 @@ export default function Dashboard() {
                 fontSize: "1.15rem",
                 borderRadius: 4,
                 fontWeight: 800,
-                boxShadow: "0 10px 28px rgba(21, 101, 192, 0.35)",
+                background: "linear-gradient(135deg, #1565C0 0%, #0284C7 100%)",
+                boxShadow: "0 10px 28px rgba(2, 132, 199, 0.4)",
                 textTransform: "none",
                 "&:hover": {
-                  boxShadow: "0 14px 34px rgba(21, 101, 192, 0.45)",
+                  boxShadow: "0 14px 34px rgba(2, 132, 199, 0.6)",
                   transform: "translateY(-2px)",
                 },
               }}

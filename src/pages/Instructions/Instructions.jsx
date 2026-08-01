@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -23,14 +24,18 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VerifiedIcon from "@mui/icons-material/Verified";
+import PrintIcon from "@mui/icons-material/Print";
 
 import { useApp } from "../../context/AppContext";
 import Navbar from "../../components/Layout/Navbar";
 import { speakText } from "../../services/audioService";
+import WorksheetModal from "../../components/dashboard/WorksheetModal";
 
 export default function Instructions() {
   const navigate = useNavigate();
   const { selectedSubject, selectedGrade, selectedActivity, isAudioMuted } = useApp();
+
+  const [showWorksheetModal, setShowWorksheetModal] = useState(false);
 
   const handleLaunchAR = () => {
     navigate("/ar");
@@ -187,27 +192,49 @@ export default function Instructions() {
                       ))}
                     </Stack>
 
-                    {/* High-Visibility Voice Guidance Narrator Button */}
-                    <Button
-                      size="medium"
-                      variant="contained"
-                      startIcon={<VolumeUpIcon />}
-                      onClick={handleListenObjective}
-                      sx={{
-                        borderRadius: 3,
-                        textTransform: "none",
-                        fontWeight: 800,
-                        px: 3,
-                        py: 1.2,
-                        fontSize: "0.95rem",
-                        backgroundColor: "#1565C0",
-                        color: "#FFFFFF",
-                        boxShadow: "0 6px 18px rgba(21, 101, 192, 0.3)",
-                        "&:hover": { backgroundColor: "#0D47A1" },
-                      }}
-                    >
-                      Listen to Voice Guidance Narrator
-                    </Button>
+                    <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+                      {/* High-Visibility Voice Guidance Narrator Button */}
+                      <Button
+                        size="medium"
+                        variant="contained"
+                        startIcon={<VolumeUpIcon />}
+                        onClick={handleListenObjective}
+                        sx={{
+                          borderRadius: 3,
+                          textTransform: "none",
+                          fontWeight: 800,
+                          px: 3,
+                          py: 1.2,
+                          fontSize: "0.95rem",
+                          backgroundColor: "#1565C0",
+                          color: "#FFFFFF",
+                          boxShadow: "0 6px 18px rgba(21, 101, 192, 0.3)",
+                          "&:hover": { backgroundColor: "#0D47A1" },
+                        }}
+                      >
+                        Listen to Voice Guidance Narrator
+                      </Button>
+
+                      {/* Printable Lab Worksheet Button */}
+                      <Button
+                        size="medium"
+                        variant="outlined"
+                        startIcon={<PrintIcon />}
+                        onClick={() => setShowWorksheetModal(true)}
+                        sx={{
+                          borderRadius: 3,
+                          textTransform: "none",
+                          fontWeight: 800,
+                          px: 2.5,
+                          py: 1.2,
+                          fontSize: "0.95rem",
+                          color: "#1565C0",
+                          borderColor: "#1565C0",
+                        }}
+                      >
+                        Print Lab Worksheet & AR Target Marker
+                      </Button>
+                    </Stack>
                   </Grid>
 
                   <Grid item xs={12} md={4}>
@@ -274,7 +301,7 @@ export default function Instructions() {
                   <Typography variant="caption" fontWeight={900} color="#92400E" display="block" mb={1} sx={{ fontSize: "0.8rem", letterSpacing: 1 }}>
                     PHYSICAL KIT APPARATUS ITEMS SIMULATED IN WEBAR:
                   </Typography>
-                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap mb={2}>
                     {selectedActivity.ncertApparatus?.map((item) => (
                       <Chip
                         key={item}
@@ -284,6 +311,16 @@ export default function Instructions() {
                       />
                     ))}
                   </Stack>
+
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<PrintIcon />}
+                    onClick={() => setShowWorksheetModal(true)}
+                    sx={{ color: "#B45309", borderColor: "#D97706", textTransform: "none", fontWeight: 700 }}
+                  >
+                    Generate Printable NCERT STEM Lab Worksheet
+                  </Button>
                 </Paper>
               )}
 
@@ -377,6 +414,15 @@ export default function Instructions() {
           )}
         </Paper>
       </Box>
+
+      {/* Printable NCERT Lab Experiment Worksheet Modal */}
+      <WorksheetModal
+        open={showWorksheetModal}
+        onClose={() => setShowWorksheetModal(false)}
+        activity={selectedActivity}
+        subject={selectedSubject}
+        grade={selectedGrade}
+      />
     </Box>
   );
 }

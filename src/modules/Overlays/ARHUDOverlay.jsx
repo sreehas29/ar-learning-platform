@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Box,
   Paper,
@@ -18,6 +18,8 @@ import AnalyticsIcon from "@mui/icons-material/Analytics";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import StopCircleIcon from "@mui/icons-material/StopCircle";
 
 import { getModelConfigForActivity } from "../../registry/modelRegistry";
 import CompletionModal from "./CompletionModal";
@@ -38,8 +40,48 @@ export default function ARHUDOverlay({ activity }) {
   const [activeHotspot, setActiveHotspot] = useState(null);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
 
+  // Guided Tour Mode State
+  const [isGuidedTourActive, setIsGuidedTourActive] = useState(false);
+  const [tourIndex, setTourIndex] = useState(0);
+
   const modelConfig = getModelConfigForActivity(activity?.id);
   const subject = activity?.subject || "math";
+  const hotspots = modelConfig.hotspots || [];
+
+  // Guided Audio Tour Interval Loop
+  useEffect(() => {
+    let timer;
+    if (isGuidedTourActive && hotspots.length > 0) {
+      const currentHs = hotspots[tourIndex];
+      setActiveHotspot(currentHs);
+      speakText(`Guided Tour Step ${tourIndex + 1}: ${currentHs.label}`, isAudioMuted);
+
+      timer = setInterval(() => {
+        setTourIndex((prev) => {
+          const nextIndex = (prev + 1) % hotspots.length;
+          if (nextIndex === 0) {
+            // Tour finished full cycle
+            setIsGuidedTourActive(false);
+            speakText("3D Guided Tour completed. You may now explore freely.", isAudioMuted);
+            return 0;
+          }
+          return nextIndex;
+        });
+      }, 6000);
+    }
+    return () => clearInterval(timer);
+  }, [isGuidedTourActive, tourIndex, hotspots, isAudioMuted]);
+
+  const handleToggleGuidedTour = () => {
+    playClickSound(isAudioMuted);
+    if (isGuidedTourActive) {
+      setIsGuidedTourActive(false);
+      speakText("Guided Tour stopped.", isAudioMuted);
+    } else {
+      setTourIndex(0);
+      setIsGuidedTourActive(true);
+    }
+  };
 
   const quizData = subject === "math" ? {
     question: "How many faces and vertices does this 3D Geometric Cube possess?",
@@ -129,6 +171,19 @@ export default function ARHUDOverlay({ activity }) {
             )}
           </Typography>
 
+          {/* Guided Audio Tour Toggle Button */}
+          <Button
+            fullWidth
+            size="small"
+            variant={isGuidedTourActive ? "contained" : "outlined"}
+            color={isGuidedTourActive ? "warning" : "info"}
+            startIcon={isGuidedTourActive ? <StopCircleIcon /> : <PlayCircleIcon />}
+            onClick={handleToggleGuidedTour}
+            sx={{ mb: 1.5, textTransform: "none", fontWeight: 700, borderRadius: 2 }}
+          >
+            {isGuidedTourActive ? "Stop 3D Guided Tour" : "Start 3D Guided Audio Tour"}
+          </Button>
+
           {/* Interactive 3D Hotspots Section */}
           <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.1)", my: 1 }} />
           <Typography variant="caption" color="rgba(255, 255, 255, 0.6)" fontWeight={600} display="block" mb={0.8}>
@@ -136,153 +191,154 @@ export default function ARHUDOverlay({ activity }) {
           </Typography>
 
           <Stack direction="row" spacing={0.8} flexWrap="wrap" useFlexGap mb={1.5}>
-            {modelConfig.hotspots?.map((hs) => (
+            {hotspots.map((hs) => (
               <Chip
                 key={hs.id}
-                icon={<LocationOnIcon fontSize="small" style={{ color: activeHotspot?.id === hs.id ? "#FFFFFF" : "#38BDF8" }} />}
+                icon={<LocationOnIcon style={{ fontSize: 14 }} />}
                 label={hs.label}
+                clickable
                 size="small"
                 onClick={() => handleHotspotClick(hs)}
                 color={activeHotspot?.id === hs.id ? "primary" : "default"}
                 variant={activeHotspot?.id === hs.id ? "filled" : "outlined"}
                 sx={{
-                  fontSize: "0.725rem",
                   color: "#FFFFFF",
-                  borderColor: "rgba(56, 189, 248, 0.4)",
-                  cursor: "pointer",
+                  borderColor: "rgba(255, 255, 255, 0.3)",
+                  fontSize: "0.75rem",
+                  "&:hover": { backgroundColor: "rgba(56, 189, 248, 0.2)" },
                 }}
               />
             ))}
           </Stack>
 
-          {/* Active Hotspot Inspector Details */}
           {activeHotspot && (
-            <Paper
-              elevation={0}
+            <Alert
+              severity="info"
+              onClose={() => setActiveHotspot(null)}
               sx={{
-                p: 1.2,
-                mb: 1.5,
-                borderRadius: 2,
-                backgroundColor: "rgba(30, 58, 138, 0.6)",
-                border: "1px solid #38BDF8",
-              }}
-            >
-              <Typography variant="caption" fontWeight={700} color="#38BDF8" display="block">
-                Hotspot Details: {activeHotspot.label}
-              </Typography>
-              <Typography variant="caption" color="rgba(255, 255, 255, 0.9)">
-                Anchored at [X:{activeHotspot.position[0]}, Y:{activeHotspot.position[1]}, Z:{activeHotspot.position[2]}]
-              </Typography>
-            </Paper>
-          )}
-
-          <Stack direction="row" spacing={1}>
-            <Button
-              fullWidth
-              size="small"
-              variant="outlined"
-              startIcon={<QuizIcon />}
-              onClick={() => setShowQuiz(!showQuiz)}
-              sx={{
+                py: 0.2,
+                px: 1,
+                fontSize: "0.75rem",
+                backgroundColor: "rgba(56, 189, 248, 0.15)",
                 color: "#38BDF8",
-                borderColor: "rgba(56, 189, 248, 0.4)",
-                textTransform: "none",
-                fontSize: "0.75rem",
+                border: "1px solid rgba(56, 189, 248, 0.3)",
               }}
             >
-              {showQuiz ? "Close Quiz" : "Quick Quiz"}
-            </Button>
-
-            <Button
-              fullWidth
-              size="small"
-              variant="contained"
-              color="success"
-              startIcon={<EmojiEventsIcon />}
-              onClick={handleFinishLesson}
-              sx={{
-                textTransform: "none",
-                fontSize: "0.75rem",
-                fontWeight: 700,
-              }}
-            >
-              Finish Lesson
-            </Button>
-          </Stack>
+              Inspecting: {activeHotspot.label}
+            </Alert>
+          )}
         </Paper>
 
-        {/* Classroom Quick Quiz Collapse Panel */}
-        <Collapse in={showQuiz}>
-          <Paper
-            elevation={4}
-            sx={{
-              p: 2.5,
-              borderRadius: 3,
-              backgroundColor: "rgba(15, 23, 42, 0.95)",
-              backdropFilter: "blur(16px)",
-              border: "1px solid rgba(56, 189, 248, 0.4)",
-              color: "#FFFFFF",
-            }}
-          >
-            <Typography variant="subtitle2" fontWeight={700} color="#38BDF8" gutterBottom>
-              Classroom Quick Check
-            </Typography>
-
-            <Typography variant="body2" sx={{ mb: 1.5, fontSize: "0.85rem" }}>
-              {quizData.question}
-            </Typography>
-
-            <RadioGroup
-              value={selectedOption}
-              onChange={(e) => {
-                setSelectedOption(e.target.value);
-                setQuizSubmitted(false);
-              }}
+        {/* Classroom Interactive Quiz Toggle */}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            mb: 1.5,
+            borderRadius: 3,
+            backgroundColor: "rgba(15, 23, 42, 0.85)",
+            backdropFilter: "blur(12px)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+            color: "#FFFFFF",
+          }}
+        >
+          <Box display="flex" alignItems="center" justifyContent="space-between">
+            <Box display="flex" alignItems="center" gap={1}>
+              <QuizIcon color="warning" fontSize="small" />
+              <Typography variant="subtitle2" fontWeight={700} color="#F59E0B">
+                Classroom AR Quiz
+              </Typography>
+            </Box>
+            <Button
+              size="small"
+              variant="outlined"
+              color="warning"
+              onClick={() => setShowQuiz(!showQuiz)}
+              sx={{ fontSize: "0.75rem", py: 0.2, textTransform: "none", borderColor: "#F59E0B" }}
             >
-              {quizData.options.map((opt) => (
-                <FormControlLabel
-                  key={opt}
-                  value={opt}
-                  control={<Radio size="small" sx={{ color: "rgba(255, 255, 255, 0.5)" }} />}
-                  label={<Typography variant="body2" sx={{ fontSize: "0.8rem" }}>{opt}</Typography>}
-                />
-              ))}
-            </RadioGroup>
+              {showQuiz ? "Hide Quiz" : "Take Quiz"}
+            </Button>
+          </Box>
 
-            {!quizSubmitted ? (
-              <Button
-                fullWidth
-                size="small"
-                variant="contained"
-                disabled={!selectedOption}
-                onClick={handleQuizSubmit}
-                sx={{ mt: 1.5, borderRadius: 2 }}
+          <Collapse in={showQuiz}>
+            <Box mt={2}>
+              <Typography variant="body2" fontWeight={600} color="#FFFFFF" mb={1}>
+                {quizData.question}
+              </Typography>
+
+              <RadioGroup
+                value={selectedOption}
+                onChange={(e) => setSelectedOption(e.target.value)}
               >
-                Submit Answer
-              </Button>
-            ) : (
-              <Alert
-                icon={<CheckCircleIcon fontSize="inherit" />}
-                severity={selectedOption === quizData.correct ? "success" : "error"}
-                sx={{ mt: 1.5, py: 0.5, fontSize: "0.8rem" }}
-              >
-                {selectedOption === quizData.correct
-                  ? "Correct! Excellent 3D observation."
-                  : `Incorrect. Correct answer: ${quizData.correct}`}
-              </Alert>
-            )}
-          </Paper>
-        </Collapse>
+                {quizData.options.map((opt) => (
+                  <FormControlLabel
+                    key={opt}
+                    value={opt}
+                    control={<Radio size="small" sx={{ color: "rgba(255, 255, 255, 0.6)" }} />}
+                    label={
+                      <Typography variant="body2" color="rgba(255, 255, 255, 0.9)">
+                        {opt}
+                      </Typography>
+                    }
+                    disabled={quizSubmitted}
+                  />
+                ))}
+              </RadioGroup>
+
+              {!quizSubmitted ? (
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color="warning"
+                  size="small"
+                  onClick={handleQuizSubmit}
+                  disabled={!selectedOption}
+                  sx={{ mt: 1.5, fontWeight: 700 }}
+                >
+                  Submit Answer
+                </Button>
+              ) : (
+                <Alert
+                  severity={selectedOption === quizData.correct ? "success" : "error"}
+                  sx={{ mt: 1.5, py: 0.2, fontSize: "0.75rem" }}
+                >
+                  {selectedOption === quizData.correct
+                    ? "Correct! Excellent 3D observation."
+                    : `Incorrect. Correct answer: ${quizData.correct}`}
+                </Alert>
+              )}
+            </Box>
+          </Collapse>
+        </Paper>
+
+        {/* Complete Lesson Action Button */}
+        <Button
+          fullWidth
+          variant="contained"
+          color="success"
+          size="medium"
+          startIcon={<EmojiEventsIcon />}
+          onClick={handleFinishLesson}
+          sx={{
+            py: 1.2,
+            borderRadius: 3,
+            fontWeight: 800,
+            fontSize: "0.95rem",
+            boxShadow: "0 8px 24px rgba(34, 197, 94, 0.3)",
+          }}
+        >
+          Finish Lesson & Get Certificate
+        </Button>
       </Box>
 
-      {/* Official Lesson Completion Certificate Modal */}
+      {/* Completion & Certificate Modal */}
       <CompletionModal
         open={showCompletionModal}
         onClose={() => setShowCompletionModal(false)}
         activity={activity}
         subject={selectedSubject}
         grade={selectedGrade}
-        score={quizSubmitted && selectedOption === quizData.correct ? "100% (Passed)" : "100% Completed"}
+        score={quizSubmitted && selectedOption === quizData.correct ? "100% (Passed)" : "Completed"}
       />
     </>
   );

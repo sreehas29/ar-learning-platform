@@ -16,6 +16,7 @@ import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import HomeIcon from "@mui/icons-material/Home";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
+import QuizIcon from "@mui/icons-material/Quiz";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useApp } from "../../context/AppContext";
@@ -108,8 +109,28 @@ export default function Navbar() {
             )}
           </Stack>
 
-          {/* Right Actions: Audio Mute + Analytics Badge + Home + Reset */}
+          {/* Right Actions: Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
           <Stack direction="row" spacing={1.2} alignItems="center">
+            <Tooltip title="Open NCERT Practice Quiz Hub">
+              <Chip
+                icon={<QuizIcon style={{ color: "#D97706" }} fontSize="small" />}
+                label="Quiz Hub"
+                size="small"
+                onClick={() => navigate("/quiz-hub")}
+                sx={{
+                  backgroundColor: "rgba(245, 158, 11, 0.15)",
+                  color: "#B45309",
+                  border: "1px solid rgba(245, 158, 11, 0.4)",
+                  fontWeight: 700,
+                  px: 0.5,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(245, 158, 11, 0.25)",
+                  },
+                }}
+              />
+            </Tooltip>
+
             <Tooltip title={isAudioMuted ? "Unmute Voice Narration" : "Mute Voice Narration"}>
               <IconButton
                 color={isAudioMuted ? "default" : "primary"}

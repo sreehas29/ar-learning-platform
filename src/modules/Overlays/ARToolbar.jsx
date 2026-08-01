@@ -23,6 +23,8 @@ import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import SpeedIcon from "@mui/icons-material/Speed";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import StraightenIcon from "@mui/icons-material/Straighten";
 
 export default function ARToolbar({
   isWireframe,
@@ -35,6 +37,10 @@ export default function ARToolbar({
   onToggleAnimPause,
   animSpeed,
   onChangeAnimSpeed,
+  isExploded,
+  onToggleExploded,
+  showDimensions,
+  onToggleDimensions,
 }) {
   const [lightAnchor, setLightAnchor] = useState(null);
   const [cameraAnchor, setCameraAnchor] = useState(null);
@@ -99,9 +105,39 @@ export default function ARToolbar({
           </IconButton>
         </Tooltip>
 
+        {/* 2. Exploded / Unfolded Nets Mode Toggle */}
+        <Tooltip title={isExploded ? "Assemble 3D Model" : "Explode / Unfold 3D Polyhedral Net"}>
+          <IconButton
+            onClick={onToggleExploded}
+            size="small"
+            sx={{
+              color: isExploded ? "#F59E0B" : "rgba(255, 255, 255, 0.75)",
+              backgroundColor: isExploded ? "rgba(245, 158, 11, 0.2)" : "transparent",
+              "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+            }}
+          >
+            <UnfoldMoreIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
+        {/* 3. 3D Dimensional Rulers Toggle */}
+        <Tooltip title={showDimensions ? "Hide 3D Rulers" : "Show Real-Time 3D Dimension Rulers"}>
+          <IconButton
+            onClick={onToggleDimensions}
+            size="small"
+            sx={{
+              color: showDimensions ? "#10B981" : "rgba(255, 255, 255, 0.75)",
+              backgroundColor: showDimensions ? "rgba(16, 185, 129, 0.2)" : "transparent",
+              "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" },
+            }}
+          >
+            <StraightenIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+
         <Divider orientation="vertical" flexItem sx={{ borderColor: "rgba(255, 255, 255, 0.15)" }} />
 
-        {/* 2. Lighting Studio Presets */}
+        {/* 4. Lighting Studio Presets */}
         <Tooltip title="Classroom 3D Lighting Presets">
           <IconButton
             onClick={handleLightClick}
@@ -156,7 +192,7 @@ export default function ARToolbar({
 
         <Divider orientation="vertical" flexItem sx={{ borderColor: "rgba(255, 255, 255, 0.15)" }} />
 
-        {/* 3. Camera View Shortcuts */}
+        {/* 5. Camera View Shortcuts */}
         <Tooltip title="Orthogonal Camera View Shortcuts">
           <IconButton
             onClick={handleCameraClick}
@@ -205,7 +241,7 @@ export default function ARToolbar({
 
         <Divider orientation="vertical" flexItem sx={{ borderColor: "rgba(255, 255, 255, 0.15)" }} />
 
-        {/* 4. Animation Pause / Play */}
+        {/* 6. Animation Pause / Play */}
         <Tooltip title={isAnimPaused ? "Resume 3D Rotation" : "Pause 3D Rotation"}>
           <IconButton
             onClick={onToggleAnimPause}
@@ -219,7 +255,7 @@ export default function ARToolbar({
           </IconButton>
         </Tooltip>
 
-        {/* 5. Animation Speed Chip */}
+        {/* 7. Animation Speed Chip */}
         <Tooltip title="Cycle Animation Speed (0.5x, 1x, 2x)">
           <Chip
             icon={<SpeedIcon style={{ color: "#38BDF8" }} fontSize="small" />}

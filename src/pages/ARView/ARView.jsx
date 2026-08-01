@@ -48,6 +48,8 @@ export default function ARView() {
   const [cameraView, setCameraView] = useState("isometric"); // "isometric" | "top" | "front"
   const [isAnimPaused, setIsAnimPaused] = useState(false);
   const [animSpeed, setAnimSpeed] = useState(1.0);
+  const [isExploded, setIsExploded] = useState(false);
+  const [showDimensions, setShowDimensions] = useState(false);
 
   const handleExit = () => {
     navigate("/instructions");
@@ -65,6 +67,8 @@ export default function ARView() {
     setCameraView("isometric");
     setIsAnimPaused(false);
     setAnimSpeed(1.0);
+    setIsExploded(false);
+    setShowDimensions(false);
   };
 
   const handleToggleTrackingMode = () => {
@@ -109,6 +113,8 @@ export default function ARView() {
         cameraView={cameraView}
         isAnimPaused={isAnimPaused}
         animSpeed={animSpeed}
+        isExploded={isExploded}
+        showDimensions={showDimensions}
       />
 
       {/* 3. Optical Marker Tracking System Overlay */}
@@ -132,6 +138,10 @@ export default function ARView() {
         onToggleAnimPause={() => setIsAnimPaused(!isAnimPaused)}
         animSpeed={animSpeed}
         onChangeAnimSpeed={setAnimSpeed}
+        isExploded={isExploded}
+        onToggleExploded={() => setIsExploded(!isExploded)}
+        showDimensions={showDimensions}
+        onToggleDimensions={() => setShowDimensions(!showDimensions)}
       />
 
       {/* 6. Top Navigation Header Bar */}

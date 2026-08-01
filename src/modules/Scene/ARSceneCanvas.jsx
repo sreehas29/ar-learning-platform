@@ -12,6 +12,8 @@ export default function ARSceneCanvas({
   cameraView = "isometric",
   isAnimPaused = false,
   animSpeed = 1.0,
+  isExploded = false,
+  showDimensions = false,
 }) {
   const mountRef = useRef(null);
 
@@ -80,12 +82,13 @@ export default function ARSceneCanvas({
     scene.add(dirLight);
     scene.add(pointLight);
 
-    // 5. Create Dynamic 3D Mesh based on Model Registry Config
+    // 5. Create Dynamic 3D Mesh & Sub-components
     const group = new THREE.Group();
     scene.add(group);
 
     let mainMesh;
     let extraObjects = [];
+    let subParts = []; // Sub-components for exploded deconstruction
 
     const geomType = config.geometryType;
 
@@ -110,6 +113,33 @@ export default function ARSceneCanvas({
       const wireframeLines = new THREE.LineSegments(wireGeo, wireMat);
       wireframeLines.scale.set(1.04, 1.04, 1.04);
       group.add(wireframeLines);
+
+      // Exploded Net Plates (Top, Bottom, Sides)
+      const faceGeo = new THREE.PlaneGeometry(1.5, 1.5);
+      const faceMat = new THREE.MeshStandardMaterial({
+        color: config.secondaryColor,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8,
+        wireframe: isWireframe,
+      });
+
+      const directions = [
+        { pos: [0, 0.85, 0], rot: [-Math.PI / 2, 0, 0], dir: [0, 1, 0] },
+        { pos: [0, -0.85, 0], rot: [Math.PI / 2, 0, 0], dir: [0, -1, 0] },
+        { pos: [0, 0, 0.85], rot: [0, 0, 0], dir: [0, 0, 1] },
+        { pos: [0, 0, -0.85], rot: [0, Math.PI, 0], dir: [0, 0, -1] },
+        { pos: [0.85, 0, 0], rot: [0, Math.PI / 2, 0], dir: [1, 0, 0] },
+        { pos: [-0.85, 0, 0], rot: [0, -Math.PI / 2, 0], dir: [-1, 0, 0] },
+      ];
+
+      directions.forEach((d) => {
+        const plate = new THREE.Mesh(faceGeo, faceMat);
+        plate.position.set(...d.pos);
+        plate.rotation.set(...d.rot);
+        group.add(plate);
+        subParts.push({ mesh: plate, basePos: d.pos, dir: d.dir });
+      });
     } else if (geomType === "solar-system") {
       // Solar System Planet + Ring + Moon
       const planetGeo = new THREE.SphereGeometry(1.2, 32, 32);
@@ -121,7 +151,7 @@ export default function ARSceneCanvas({
       mainMesh = new THREE.Mesh(planetGeo, planetMat);
       group.add(mainMesh);
 
-      const ringGeo = new THREE.RingGeometry(1.5, 2.0, 32);
+      const ringGeo = new THREE.RingGeometry(1.5, 2.2, 32);
       const ringMat = new THREE.MeshBasicMaterial({
         color: config.secondaryColor,
         side: THREE.DoubleSide,
@@ -132,6 +162,7 @@ export default function ARSceneCanvas({
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
       ringMesh.rotation.x = Math.PI / 2.5;
       group.add(ringMesh);
+      subParts.push({ mesh: ringMesh, basePos: [0, 0, 0], dir: [0, 0.8, 0.5] });
 
       const moonGeo = new THREE.SphereGeometry(0.3, 16, 16);
       const moonMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, wireframe: isWireframe });
@@ -139,6 +170,7 @@ export default function ARSceneCanvas({
       moonMesh.position.set(2.2, 0, 0);
       group.add(moonMesh);
       extraObjects.push({ mesh: moonMesh, radius: 2.2, speed: 1.2 });
+      subParts.push({ mesh: moonMesh, basePos: [2.2, 0, 0], dir: [1, 0.5, 0] });
     } else if (geomType === "atomic") {
       // Bohr Atomic Model Nucleus + Electrons
       const nucleusGeo = new THREE.SphereGeometry(0.7, 32, 32);
@@ -157,6 +189,7 @@ export default function ARSceneCanvas({
         ringMesh.rotation.x = (Math.PI / 3) * i;
         ringMesh.rotation.y = (Math.PI / 4) * i;
         group.add(ringMesh);
+        subParts.push({ mesh: ringMesh, basePos: [0, 0, 0], dir: [0, 0.5 * (i + 1), 0.5 * (i + 1)] });
 
         const electronGeo = new THREE.SphereGeometry(0.12, 16, 16);
         const electronMat = new THREE.MeshBasicMaterial({ color: config.wireframeColor, wireframe: isWireframe });
@@ -177,10 +210,49 @@ export default function ARSceneCanvas({
       group.add(mainMesh);
     }
 
-    // 6. Animation Frame Loop
+    // 6. 3D Bounding Box Dimension Rulers
+    let boxHelper = null;
+    if (showDimensions && mainMesh) {
+      boxHelper = new THREE.BoxHelper(mainMesh, 0x10b981);
+      scene.add(boxHelper);
+    }
+
+    // 7. Interactive Pointer Drag & Orbit State
+    let isDragging = false;
+    let prevPointer = { x: 0, y: 0 };
+    let gestureRotation = { x: 0, y: 0 };
+
+    const handlePointerDown = (e) => {
+      isDragging = true;
+      prevPointer = { x: e.clientX, y: e.clientY };
+    };
+
+    const handlePointerMove = (e) => {
+      if (!isDragging) return;
+      const deltaX = e.clientX - prevPointer.x;
+      const deltaY = e.clientY - prevPointer.y;
+
+      gestureRotation.y += deltaX * 0.008;
+      gestureRotation.x += deltaY * 0.008;
+
+      prevPointer = { x: e.clientX, y: e.clientY };
+    };
+
+    const handlePointerUp = () => {
+      isDragging = false;
+    };
+
+    const domElement = renderer.domElement;
+    domElement.style.pointerEvents = "auto";
+    domElement.addEventListener("pointerdown", handlePointerDown);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+
+    // 8. Animation Frame Loop
     let animationFrameId;
     let clock = new THREE.Clock();
     let accumulatedTime = 0;
+    let explodeProgress = 0;
 
     function animate() {
       animationFrameId = requestAnimationFrame(animate);
@@ -190,8 +262,20 @@ export default function ARSceneCanvas({
         accumulatedTime += delta * animSpeed;
       }
 
-      group.rotation.y = accumulatedTime * config.autoRotateSpeed + (manualRotation * Math.PI) / 180;
-      group.rotation.x = Math.sin(accumulatedTime * 0.3) * 0.2;
+      // Smooth Explode / Unfold Transition
+      const targetExplode = isExploded ? 1 : 0;
+      explodeProgress += (targetExplode - explodeProgress) * 0.08;
+
+      subParts.forEach((part) => {
+        const offset = 0.8 * explodeProgress;
+        part.mesh.position.x = part.basePos[0] + part.dir[0] * offset;
+        part.mesh.position.y = part.basePos[1] + part.dir[1] * offset;
+        part.mesh.position.z = part.basePos[2] + part.dir[2] * offset;
+      });
+
+      // Combine Auto-Rotation + Manual Rotation + Direct Pointer Gesture
+      group.rotation.y = accumulatedTime * config.autoRotateSpeed + (manualRotation * Math.PI) / 180 + gestureRotation.y;
+      group.rotation.x = Math.sin(accumulatedTime * 0.3) * 0.2 + gestureRotation.x;
 
       const combinedScale = config.initialScale * scaleFactor;
       group.scale.set(combinedScale, combinedScale, combinedScale);
@@ -204,12 +288,16 @@ export default function ARSceneCanvas({
         }
       });
 
+      if (boxHelper) {
+        boxHelper.update();
+      }
+
       renderer.render(scene, camera);
     }
 
     animate();
 
-    // 7. Resize Handler
+    // 9. Resize Handler
     function handleResize() {
       if (!container) return;
       const w = container.clientWidth;
@@ -224,12 +312,27 @@ export default function ARSceneCanvas({
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener("resize", handleResize);
+      domElement.removeEventListener("pointerdown", handlePointerDown);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
     };
-  }, [activity, isWireframe, manualRotation, scaleFactor, lightingPreset, cameraView, isAnimPaused, animSpeed]);
+  }, [
+    activity,
+    isWireframe,
+    manualRotation,
+    scaleFactor,
+    lightingPreset,
+    cameraView,
+    isAnimPaused,
+    animSpeed,
+    isExploded,
+    showDimensions,
+  ]);
 
   return (
     <Box
@@ -241,7 +344,7 @@ export default function ARSceneCanvas({
         top: 0,
         left: 0,
         zIndex: 1,
-        pointerEvents: "none",
+        pointerEvents: "auto",
       }}
     />
   );

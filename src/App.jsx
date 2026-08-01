@@ -6,6 +6,7 @@ import Activity from "./pages/Activity/Activity";
 import Instructions from "./pages/Instructions/Instructions";
 import ARView from "./pages/ARView/ARView";
 import QuizHub from "./pages/QuizHub/QuizHub";
+import ModelLibrary from "./pages/ModelLibrary/ModelLibrary";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/instructions" element={<Instructions />} />
       <Route path="/ar" element={<ARView />} />
       <Route path="/quiz-hub" element={<QuizHub />} />
+      <Route path="/models" element={<ModelLibrary />} />
     </Routes>
   );
 }

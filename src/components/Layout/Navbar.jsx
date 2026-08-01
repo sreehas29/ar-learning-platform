@@ -112,8 +112,28 @@ export default function Navbar() {
             )}
           </Stack>
 
-          {/* Right Actions: Classroom Live Session + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
+          {/* Right Actions: 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
           <Stack direction="row" spacing={1.2} alignItems="center">
+            <Tooltip title="Explore 3D WebGL Model Library">
+              <Chip
+                icon={<ViewInArIcon style={{ color: "#1565C0" }} fontSize="small" />}
+                label="3D Models"
+                size="small"
+                onClick={() => navigate("/models")}
+                sx={{
+                  backgroundColor: "rgba(21, 101, 192, 0.12)",
+                  color: "#1565C0",
+                  border: "1px solid rgba(21, 101, 192, 0.4)",
+                  fontWeight: 700,
+                  px: 0.5,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(21, 101, 192, 0.22)",
+                  },
+                }}
+              />
+            </Tooltip>
+
             <Tooltip title="Host or Join Live AR Classroom Session">
               <Chip
                 icon={<GroupsIcon style={{ color: "#0284C7" }} fontSize="small" />}

@@ -170,7 +170,7 @@ export default function GamificationModal({ open, onClose, completedCount = 2 })
             <Grid item xs={12} sm={4} textAlign={{ sm: "right" }}>
               <Chip
                 icon={<VerifiedIcon style={{ color: "#4ADE80" }} />}
-                label={`${completedActivities?.length || completedCount} Completed Lessons`}
+                label={`${completedCount} Completed Lessons`}
                 sx={{ backgroundColor: "rgba(74, 222, 128, 0.15)", color: "#4ADE80", fontWeight: 800, py: 2, fontSize: "0.9rem" }}
               />
             </Grid>

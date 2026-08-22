@@ -25,17 +25,20 @@ import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VerifiedIcon from "@mui/icons-material/Verified";
 import PrintIcon from "@mui/icons-material/Print";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 import { useApp } from "../../context/AppContext";
 import Navbar from "../../components/Layout/Navbar";
 import { speakText } from "../../services/audioService";
 import WorksheetModal from "../../components/dashboard/WorksheetModal";
+import LessonPlanModal from "../../components/dashboard/LessonPlanModal";
 
 export default function Instructions() {
   const navigate = useNavigate();
   const { selectedSubject, selectedGrade, selectedActivity, isAudioMuted } = useApp();
 
   const [showWorksheetModal, setShowWorksheetModal] = useState(false);
+  const [showLessonPlanModal, setShowLessonPlanModal] = useState(false);
 
   const handleLaunchAR = () => {
     navigate("/ar");
@@ -234,6 +237,27 @@ export default function Instructions() {
                       >
                         Print Lab Worksheet & AR Target Marker
                       </Button>
+
+                      {/* Generate 5E Lesson Plan Button */}
+                      <Button
+                        size="medium"
+                        variant="outlined"
+                        color="secondary"
+                        startIcon={<DescriptionIcon />}
+                        onClick={() => setShowLessonPlanModal(true)}
+                        sx={{
+                          borderRadius: 3,
+                          textTransform: "none",
+                          fontWeight: 800,
+                          px: 2.5,
+                          py: 1.2,
+                          fontSize: "0.95rem",
+                          color: "#7C3AED",
+                          borderColor: "#7C3AED",
+                        }}
+                      >
+                        Generate 5E Lesson Plan
+                      </Button>
                     </Stack>
                   </Grid>
 
@@ -312,15 +336,28 @@ export default function Instructions() {
                     ))}
                   </Stack>
 
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    startIcon={<PrintIcon />}
-                    onClick={() => setShowWorksheetModal(true)}
-                    sx={{ color: "#B45309", borderColor: "#D97706", textTransform: "none", fontWeight: 700 }}
-                  >
-                    Generate Printable NCERT STEM Lab Worksheet
-                  </Button>
+                  <Stack direction="row" spacing={1.5}>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      startIcon={<PrintIcon />}
+                      onClick={() => setShowWorksheetModal(true)}
+                      sx={{ color: "#B45309", borderColor: "#D97706", textTransform: "none", fontWeight: 700 }}
+                    >
+                      Generate Printable NCERT STEM Lab Worksheet
+                    </Button>
+
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                      startIcon={<DescriptionIcon />}
+                      onClick={() => setShowLessonPlanModal(true)}
+                      sx={{ color: "#7C3AED", borderColor: "#7C3AED", textTransform: "none", fontWeight: 700 }}
+                    >
+                      Export 5E Model Lesson Plan
+                    </Button>
+                  </Stack>
                 </Paper>
               )}
 
@@ -419,6 +456,15 @@ export default function Instructions() {
       <WorksheetModal
         open={showWorksheetModal}
         onClose={() => setShowWorksheetModal(false)}
+        activity={selectedActivity}
+        subject={selectedSubject}
+        grade={selectedGrade}
+      />
+
+      {/* Official NCERT 5E Model Lesson Plan Modal */}
+      <LessonPlanModal
+        open={showLessonPlanModal}
+        onClose={() => setShowLessonPlanModal(false)}
         activity={selectedActivity}
         subject={selectedSubject}
         grade={selectedGrade}

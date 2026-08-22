@@ -72,7 +72,11 @@ export default function ARView() {
   };
 
   const handleExit = () => {
-    navigate("/instructions");
+    if (selectedActivity) {
+      navigate("/instructions");
+    } else {
+      navigate("/activity");
+    }
   };
 
   const handleRotateLeft = () => setRotation((prev) => prev - 45);
@@ -183,6 +187,7 @@ export default function ARView() {
       {/* 7. Top Navigation Header Bar */}
       <Box
         sx={{
+          position: "relative",
           p: 2,
           display: "flex",
           alignItems: "center",
@@ -190,7 +195,7 @@ export default function ARView() {
           background: "rgba(15, 23, 42, 0.75)",
           backdropFilter: "blur(12px)",
           borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-          zIndex: 10,
+          zIndex: 100,
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">

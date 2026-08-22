@@ -19,11 +19,15 @@ import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import QuizIcon from "@mui/icons-material/Quiz";
 import GroupsIcon from "@mui/icons-material/Groups";
 import BuildIcon from "@mui/icons-material/Build";
+import WifiIcon from "@mui/icons-material/Wifi";
+import WifiOffIcon from "@mui/icons-material/WifiOff";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useApp } from "../../context/AppContext";
 import AnalyticsModal from "../dashboard/AnalyticsModal";
 import ClassroomSessionModal from "../../modules/Classroom/ClassroomSessionModal";
+import PwaInstallBanner from "../dashboard/PwaInstallBanner";
+import { useNetworkStatus } from "../../services/pwaService";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -37,6 +41,7 @@ export default function Navbar() {
     toggleAudioMute,
   } = useApp();
 
+  const { isOnline } = useNetworkStatus();
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const [showClassroomModal, setShowClassroomModal] = useState(false);
 
@@ -91,6 +96,19 @@ export default function Navbar() {
 
           {/* Center Breadcrumbs / Active Context Badge */}
           <Stack direction="row" spacing={1} alignItems="center" display={{ xs: "none", md: "flex" }}>
+            {/* Live Network Status Chip */}
+            <Chip
+              icon={isOnline ? <WifiIcon style={{ color: "#10B981" }} fontSize="small" /> : <WifiOffIcon style={{ color: "#EF4444" }} fontSize="small" />}
+              label={isOnline ? "Online (100% Cached)" : "Offline Mode Active"}
+              size="small"
+              sx={{
+                fontWeight: 700,
+                backgroundColor: isOnline ? "rgba(16, 185, 129, 0.1)" : "rgba(239, 68, 68, 0.1)",
+                color: isOnline ? "#059669" : "#DC2626",
+                border: `1px solid ${isOnline ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"}`,
+              }}
+            />
+
             {selectedSubject && (
               <Chip
                 label={`Subject: ${selectedSubject.toUpperCase()}`}
@@ -254,6 +272,9 @@ export default function Navbar() {
         open={showClassroomModal}
         onClose={() => setShowClassroomModal(false)}
       />
+
+      {/* Offline PWA Installation & Pre-cache Banner */}
+      <PwaInstallBanner />
     </>
   );
 }

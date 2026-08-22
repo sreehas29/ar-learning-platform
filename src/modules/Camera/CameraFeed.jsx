@@ -24,10 +24,21 @@ export default function CameraFeed({ isCameraEnabled = true }) {
 
       try {
         setPermissionError(null);
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false,
-        });
+        let stream;
+        try {
+          // 1. Try environment (rear) camera first for mobile/AR markers
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: false,
+          });
+        } catch (err) {
+          console.log("Rear camera unavailable, falling back to default webcam:", err);
+          // 2. Fallback to default webcam (laptops/desktops)
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+        }
 
         currentStream = stream;
         if (videoRef.current) {
@@ -37,7 +48,7 @@ export default function CameraFeed({ isCameraEnabled = true }) {
         setStreamActive(true);
       } catch (err) {
         console.warn("Camera access fallback:", err);
-        setPermissionError("Camera access unavailable. Rendering in 3D AR Studio Mode.");
+        setPermissionError("Camera permission denied or unavailable. Rendering in 3D AR Studio Mode.");
         setStreamActive(false);
       }
     }
@@ -64,7 +75,7 @@ export default function CameraFeed({ isCameraEnabled = true }) {
         backgroundColor: "#0A0E17",
       }}
     >
-      {/* Real Video Stream */}
+      {/* Real Video Stream Passthrough */}
       <video
         ref={videoRef}
         autoPlay

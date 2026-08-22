@@ -35,7 +35,7 @@ export default function ARView() {
   const { selectedActivity, selectedGrade } = useApp();
 
   // State Management
-  const [isCameraEnabled, setIsCameraEnabled] = useState(false);
+  const [isCameraEnabled, setIsCameraEnabled] = useState(true);
   const [trackingMode, setTrackingMode] = useState("marker"); // "marker" | "surface"
   const [snapshotTaken, setSnapshotTaken] = useState(false);
   const [rotation, setRotation] = useState(0);

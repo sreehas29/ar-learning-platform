@@ -18,6 +18,7 @@ import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import QuizIcon from "@mui/icons-material/Quiz";
 import GroupsIcon from "@mui/icons-material/Groups";
+import BuildIcon from "@mui/icons-material/Build";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useApp } from "../../context/AppContext";
@@ -112,8 +113,28 @@ export default function Navbar() {
             )}
           </Stack>
 
-          {/* Right Actions: 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
+          {/* Right Actions: 3D Sandbox + 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
           <Stack direction="row" spacing={1.2} alignItems="center">
+            <Tooltip title="Freeform 3D AR Geometry Sandbox">
+              <Chip
+                icon={<BuildIcon style={{ color: "#10B981" }} fontSize="small" />}
+                label="3D Sandbox"
+                size="small"
+                onClick={() => navigate("/sandbox")}
+                sx={{
+                  backgroundColor: "rgba(16, 185, 129, 0.12)",
+                  color: "#059669",
+                  border: "1px solid rgba(16, 185, 129, 0.4)",
+                  fontWeight: 700,
+                  px: 0.5,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(16, 185, 129, 0.22)",
+                  },
+                }}
+              />
+            </Tooltip>
+
             <Tooltip title="Explore 3D WebGL Model Library">
               <Chip
                 icon={<ViewInArIcon style={{ color: "#1565C0" }} fontSize="small" />}

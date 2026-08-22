@@ -19,11 +19,13 @@ import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import QuizIcon from "@mui/icons-material/Quiz";
 import GroupsIcon from "@mui/icons-material/Groups";
 import BuildIcon from "@mui/icons-material/Build";
+import StarsIcon from "@mui/icons-material/Stars";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useApp } from "../../context/AppContext";
 import AnalyticsModal from "../dashboard/AnalyticsModal";
 import ClassroomSessionModal from "../../modules/Classroom/ClassroomSessionModal";
+import GamificationModal from "../dashboard/GamificationModal";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -39,11 +41,14 @@ export default function Navbar() {
 
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const [showClassroomModal, setShowClassroomModal] = useState(false);
+  const [showGamificationModal, setShowGamificationModal] = useState(false);
 
   const handleReset = () => {
     resetSelection();
     navigate("/");
   };
+
+  const totalXp = (completedActivities?.length || 2) * 150 + 250;
 
   return (
     <>
@@ -113,8 +118,28 @@ export default function Navbar() {
             )}
           </Stack>
 
-          {/* Right Actions: 3D Sandbox + 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
+          {/* Right Actions: XP & Badges + 3D Sandbox + 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
           <Stack direction="row" spacing={1.2} alignItems="center">
+            <Tooltip title="View STEM XP Points & Achievement Badges">
+              <Chip
+                icon={<StarsIcon style={{ color: "#D97706" }} fontSize="small" />}
+                label={`${totalXp} XP`}
+                size="small"
+                onClick={() => setShowGamificationModal(true)}
+                sx={{
+                  backgroundColor: "rgba(245, 158, 11, 0.15)",
+                  color: "#B45309",
+                  border: "1px solid rgba(245, 158, 11, 0.4)",
+                  fontWeight: 800,
+                  px: 0.5,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(245, 158, 11, 0.25)",
+                  },
+                }}
+              />
+            </Tooltip>
+
             <Tooltip title="Freeform 3D AR Geometry Sandbox">
               <Chip
                 icon={<BuildIcon style={{ color: "#10B981" }} fontSize="small" />}
@@ -253,6 +278,13 @@ export default function Navbar() {
       <ClassroomSessionModal
         open={showClassroomModal}
         onClose={() => setShowClassroomModal(false)}
+      />
+
+      {/* Student STEM Gamification Modal */}
+      <GamificationModal
+        open={showGamificationModal}
+        onClose={() => setShowGamificationModal(false)}
+        completedCount={completedActivities?.length || 2}
       />
     </>
   );

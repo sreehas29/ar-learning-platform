@@ -8,6 +8,7 @@ import ARView from "./pages/ARView/ARView";
 import QuizHub from "./pages/QuizHub/QuizHub";
 import ModelLibrary from "./pages/ModelLibrary/ModelLibrary";
 import ARSandbox from "./pages/ARSandbox/ARSandbox";
+import ModelCompare from "./pages/ModelCompare/ModelCompare";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
       <Route path="/quiz-hub" element={<QuizHub />} />
       <Route path="/models" element={<ModelLibrary />} />
       <Route path="/sandbox" element={<ARSandbox />} />
+      <Route path="/compare" element={<ModelCompare />} />
     </Routes>
   );
 }

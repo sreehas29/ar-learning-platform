@@ -20,6 +20,7 @@ import QuizIcon from "@mui/icons-material/Quiz";
 import GroupsIcon from "@mui/icons-material/Groups";
 import BuildIcon from "@mui/icons-material/Build";
 import StarsIcon from "@mui/icons-material/Stars";
+import CompareIcon from "@mui/icons-material/Compare";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useApp } from "../../context/AppContext";
@@ -118,8 +119,28 @@ export default function Navbar() {
             )}
           </Stack>
 
-          {/* Right Actions: XP & Badges + 3D Sandbox + 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
+          {/* Right Actions: Compare 3D + XP & Badges + 3D Sandbox + 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
           <Stack direction="row" spacing={1.2} alignItems="center">
+            <Tooltip title="Dual 3D AR Model Side-by-Side Comparison Explorer">
+              <Chip
+                icon={<CompareIcon style={{ color: "#0284C7" }} fontSize="small" />}
+                label="Compare 3D"
+                size="small"
+                onClick={() => navigate("/compare")}
+                sx={{
+                  backgroundColor: "rgba(2, 132, 199, 0.12)",
+                  color: "#0284C7",
+                  border: "1px solid rgba(2, 132, 199, 0.4)",
+                  fontWeight: 800,
+                  px: 0.5,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(2, 132, 199, 0.22)",
+                  },
+                }}
+              />
+            </Tooltip>
+
             <Tooltip title="View STEM XP Points & Achievement Badges">
               <Chip
                 icon={<StarsIcon style={{ color: "#D97706" }} fontSize="small" />}

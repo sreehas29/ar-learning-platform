@@ -21,12 +21,14 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import BuildIcon from "@mui/icons-material/Build";
 import StarsIcon from "@mui/icons-material/Stars";
 import CompareIcon from "@mui/icons-material/Compare";
+import SlideshowIcon from "@mui/icons-material/Slideshow";
 import { useNavigate, useLocation } from "react-router-dom";
 
 import { useApp } from "../../context/AppContext";
 import AnalyticsModal from "../dashboard/AnalyticsModal";
 import ClassroomSessionModal from "../../modules/Classroom/ClassroomSessionModal";
 import GamificationModal from "../dashboard/GamificationModal";
+import TourCreatorModal from "../dashboard/TourCreatorModal";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -43,6 +45,7 @@ export default function Navbar() {
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
   const [showClassroomModal, setShowClassroomModal] = useState(false);
   const [showGamificationModal, setShowGamificationModal] = useState(false);
+  const [showTourModal, setShowTourModal] = useState(false);
 
   const handleReset = () => {
     resetSelection();
@@ -119,8 +122,28 @@ export default function Navbar() {
             )}
           </Stack>
 
-          {/* Right Actions: Compare 3D + XP & Badges + 3D Sandbox + 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
+          {/* Right Actions: 3D Slides + Compare 3D + XP & Badges + 3D Sandbox + 3D Models + Live AR Room + Quiz Hub + Audio Mute + Analytics Badge + Home + Reset */}
           <Stack direction="row" spacing={1.2} alignItems="center">
+            <Tooltip title="Compose & Present 3D Presentation Decks">
+              <Chip
+                icon={<SlideshowIcon style={{ color: "#7C3AED" }} fontSize="small" />}
+                label="3D Slides"
+                size="small"
+                onClick={() => setShowTourModal(true)}
+                sx={{
+                  backgroundColor: "rgba(124, 58, 237, 0.12)",
+                  color: "#7C3AED",
+                  border: "1px solid rgba(124, 58, 237, 0.4)",
+                  fontWeight: 800,
+                  px: 0.5,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "rgba(124, 58, 237, 0.22)",
+                  },
+                }}
+              />
+            </Tooltip>
+
             <Tooltip title="Dual 3D AR Model Side-by-Side Comparison Explorer">
               <Chip
                 icon={<CompareIcon style={{ color: "#0284C7" }} fontSize="small" />}
@@ -306,6 +329,12 @@ export default function Navbar() {
         open={showGamificationModal}
         onClose={() => setShowGamificationModal(false)}
         completedCount={completedActivities?.length || 2}
+      />
+
+      {/* Teacher 3D Presentation Deck Creator Modal */}
+      <TourCreatorModal
+        open={showTourModal}
+        onClose={() => setShowTourModal(false)}
       />
     </>
   );

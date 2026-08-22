@@ -15,6 +15,7 @@ export default function ARSceneCanvas({
   isExploded = false,
   showDimensions = false,
   simParams = {},
+  sliceParams = {},
 }) {
   const mountRef = useRef(null);
 
@@ -47,6 +48,20 @@ export default function ARSceneCanvas({
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
+
+    // Configure 3D GPU Clipping Plane for Cross-Section Slicing
+    if (sliceParams?.enabled) {
+      const norm =
+        sliceParams.axis === "y"
+          ? new THREE.Vector3(0, -1, 0)
+          : sliceParams.axis === "z"
+          ? new THREE.Vector3(0, 0, -1)
+          : new THREE.Vector3(-1, 0, 0);
+      const clipPlane = new THREE.Plane(norm, sliceParams.depth || 0);
+      renderer.clippingPlanes = [clipPlane];
+      renderer.localClippingEnabled = true;
+    }
+
     container.appendChild(renderer.domElement);
 
     // 4. Lighting Studio Presets
@@ -484,6 +499,7 @@ export default function ARSceneCanvas({
     isExploded,
     showDimensions,
     simParams,
+    sliceParams,
   ]);
 
   return (

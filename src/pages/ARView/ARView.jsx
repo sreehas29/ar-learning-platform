@@ -2,56 +2,60 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
-  Typography,
-  Button,
-  IconButton,
-  Chip,
   Paper,
-  Stack,
+  IconButton,
+  Button,
+  Chip,
   Tooltip,
-  Alert,
+  Stack,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import RotateRightIcon from "@mui/icons-material/RotateRight";
-import RotateLeftIcon from "@mui/icons-material/RotateLeft";
-import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import ZoomOutIcon from "@mui/icons-material/ZoomOut";
-import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import GridViewIcon from "@mui/icons-material/GridView";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import RotateLeftIcon from "@mui/icons-material/RotateLeft";
+import RotateRightIcon from "@mui/icons-material/RotateRight";
+import ZoomInIcon from "@mui/icons-material/ZoomIn";
+import ZoomOutIcon from "@mui/icons-material/ZoomOut";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 
 import { useApp } from "../../context/AppContext";
+import { getModelConfigForActivity } from "../../registry/modelRegistry";
 import CameraFeed from "../../modules/Camera/CameraFeed";
 import ARSceneCanvas from "../../modules/Scene/ARSceneCanvas";
+import MarkerTracker from "../../modules/Tracking/MarkerTracker";
 import ARHUDOverlay from "../../modules/Overlays/ARHUDOverlay";
 import ARToolbar from "../../modules/Overlays/ARToolbar";
-import MarkerTracker from "../../modules/Tracking/MarkerTracker";
 import SimulationControls from "../../modules/Overlays/SimulationControls";
-import { exportCanvasSnapshot } from "../../services/arService";
-import { playSnapshotSound } from "../../services/audioService";
-import { getModelConfigForActivity } from "../../registry/modelRegistry";
 
 export default function ARView() {
   const navigate = useNavigate();
-  const { selectedSubject, selectedGrade, selectedActivity, isAudioMuted } = useApp();
+  const { selectedActivity, selectedGrade } = useApp();
 
-  const [rotation, setRotation] = useState(0);
-  const [scale, setScale] = useState(1);
-  const [isWireframe, setIsWireframe] = useState(false);
-  const [isCameraEnabled, setIsCameraEnabled] = useState(true);
+  // State Management
+  const [isCameraEnabled, setIsCameraEnabled] = useState(false);
   const [trackingMode, setTrackingMode] = useState("marker"); // "marker" | "surface"
   const [snapshotTaken, setSnapshotTaken] = useState(false);
+  const [rotation, setRotation] = useState(0);
+  const [scale, setScale] = useState(1);
 
-  // Advanced 3D Scene Controls
-  const [lightingPreset, setLightingPreset] = useState("studio"); // "studio" | "contrast" | "sunlight" | "cyber"
+  // 3D Scene Configurations
+  const [isWireframe, setIsWireframe] = useState(false);
+  const [lightingPreset, setLightingPreset] = useState("studio"); // "studio" | "warm" | "contrast"
   const [cameraView, setCameraView] = useState("isometric"); // "isometric" | "top" | "front"
   const [isAnimPaused, setIsAnimPaused] = useState(false);
   const [animSpeed, setAnimSpeed] = useState(1.0);
   const [isExploded, setIsExploded] = useState(false);
   const [showDimensions, setShowDimensions] = useState(false);
+
+  // Live 3D Cross-Section & Slice Parameters
+  const [sliceParams, setSliceParams] = useState({
+    enabled: false,
+    axis: "x",
+    depth: 0,
+  });
 
   // Live STEM Simulation Parameters
   const [simParams, setSimParams] = useState({
@@ -85,6 +89,7 @@ export default function ARView() {
     setAnimSpeed(1.0);
     setIsExploded(false);
     setShowDimensions(false);
+    setSliceParams({ enabled: false, axis: "x", depth: 0 });
     setSimParams({
       atomicNumber: 6,
       refractiveIndex: 1.5,
@@ -100,8 +105,6 @@ export default function ARView() {
   };
 
   const handleSnapshot = () => {
-    playSnapshotSound(isAudioMuted);
-    exportCanvasSnapshot(`AR-Lesson-${selectedActivity?.id || "snapshot"}.png`);
     setSnapshotTaken(true);
     setTimeout(() => setSnapshotTaken(false), 3000);
   };
@@ -111,25 +114,18 @@ export default function ARView() {
   return (
     <Box
       sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "#0A0E17",
-        color: "#FFFFFF",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "space-between",
-        zIndex: 9999,
+        position: "relative",
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "#090D16",
         overflow: "hidden",
-        fontFamily: "Inter, Roboto, sans-serif",
+        userSelect: "none",
       }}
     >
-      {/* 1. Live Camera Passthrough Feed */}
+      {/* 1. Live Camera Feed Layer (Conditional Passthrough) */}
       <CameraFeed isCameraEnabled={isCameraEnabled} />
 
-      {/* 2. Three.js 3D WebGL Scene Engine */}
+      {/* 2. Three.js 3D WebGL WebAR Renderer Canvas */}
       <ARSceneCanvas
         activity={selectedActivity}
         isWireframe={isWireframe}
@@ -142,6 +138,7 @@ export default function ARView() {
         isExploded={isExploded}
         showDimensions={showDimensions}
         simParams={simParams}
+        sliceParams={sliceParams}
       />
 
       {/* 3. Optical Marker Tracking System Overlay */}
@@ -150,8 +147,12 @@ export default function ARView() {
         onToggleMode={handleToggleTrackingMode}
       />
 
-      {/* 4. Educational AR Analytics & Quiz Overlay */}
-      <ARHUDOverlay activity={selectedActivity} />
+      {/* 4. Educational AR Analytics & Quiz Overlay with 3D Slice Controls */}
+      <ARHUDOverlay
+        activity={selectedActivity}
+        sliceParams={sliceParams}
+        onUpdateSliceParams={setSliceParams}
+      />
 
       {/* 5. Live STEM Simulation Controls & Sliders Overlay */}
       <SimulationControls

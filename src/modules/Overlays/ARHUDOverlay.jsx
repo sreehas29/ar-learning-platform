@@ -5,8 +5,6 @@ import {
   Typography,
   Chip,
   Button,
-  RadioGroup,
-  FormControlLabel,
   Collapse,
   Alert,
   Stack,
@@ -18,14 +16,16 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import FunctionsIcon from "@mui/icons-material/Functions";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import ContentCutIcon from "@mui/icons-material/ContentCut";
 
 import { useApp } from "../../context/AppContext";
 import { getModelConfigForActivity } from "../../registry/modelRegistry";
 import CompletionModal from "./CompletionModal";
 import FormulaVisualizerModal from "../../components/dashboard/FormulaVisualizerModal";
+import SliceControls from "./SliceControls";
 import { speakText, playSuccessChime, playErrorTone } from "../../services/audioService";
 
-export default function ARHUDOverlay({ activity }) {
+export default function ARHUDOverlay({ activity, sliceParams, onUpdateSliceParams }) {
   const { isAudioMuted } = useApp();
   const [activeHotspot, setActiveHotspot] = useState(null);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -34,6 +34,7 @@ export default function ARHUDOverlay({ activity }) {
   const [isCorrect, setIsCorrect] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
   const [showFormulaModal, setShowFormulaModal] = useState(false);
+  const [showSlicePanel, setShowSlicePanel] = useState(false);
 
   // Audio Tour Mode State
   const [isTourActive, setIsTourActive] = useState(false);
@@ -177,7 +178,7 @@ export default function ARHUDOverlay({ activity }) {
           )}
         </Paper>
 
-        {/* 3D Formula Visualizer & Quiz Action Triggers */}
+        {/* 3D Slice Mode + Formula Visualizer + AR Quiz Buttons */}
         <Paper
           elevation={0}
           sx={{
@@ -190,7 +191,19 @@ export default function ARHUDOverlay({ activity }) {
             color: "#FFFFFF",
           }}
         >
-          <Stack direction="row" spacing={1} mb={1}>
+          <Stack direction="row" spacing={0.8} mb={1}>
+            <Button
+              fullWidth
+              size="small"
+              variant={sliceParams?.enabled ? "contained" : "outlined"}
+              color="error"
+              startIcon={<ContentCutIcon />}
+              onClick={() => setShowSlicePanel(!showSlicePanel)}
+              sx={{ fontSize: "0.75rem", py: 0.5, textTransform: "none", fontWeight: 700 }}
+            >
+              3D Slice
+            </Button>
+
             <Button
               fullWidth
               size="small"
@@ -200,7 +213,7 @@ export default function ARHUDOverlay({ activity }) {
               onClick={() => setShowFormulaModal(true)}
               sx={{ fontSize: "0.75rem", py: 0.5, textTransform: "none", fontWeight: 700, borderColor: "#38BDF8", color: "#38BDF8" }}
             >
-              3D Formulas
+              Formulas
             </Button>
 
             <Button
@@ -212,7 +225,7 @@ export default function ARHUDOverlay({ activity }) {
               onClick={() => setShowQuiz(!showQuiz)}
               sx={{ fontSize: "0.75rem", py: 0.5, textTransform: "none", fontWeight: 700, borderColor: "#F59E0B", color: "#F59E0B" }}
             >
-              {showQuiz ? "Hide Quiz" : "AR Quiz"}
+              {showQuiz ? "Hide" : "Quiz"}
             </Button>
           </Stack>
 
@@ -263,6 +276,15 @@ export default function ARHUDOverlay({ activity }) {
             </Box>
           </Collapse>
         </Paper>
+
+        {/* 3D Slice Controls Panel */}
+        {showSlicePanel && (
+          <SliceControls
+            sliceParams={sliceParams}
+            onUpdateSliceParams={onUpdateSliceParams}
+            onClose={() => setShowSlicePanel(false)}
+          />
+        )}
       </Box>
 
       {/* Completion Modal Trigger */}
